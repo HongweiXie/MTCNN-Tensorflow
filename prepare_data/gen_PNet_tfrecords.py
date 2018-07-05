@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from tfrecord_utils import _process_image_withoutcoder, _convert_to_example_simple
 
-
+data_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data'
 def _add_to_tfrecord(filename, image_example, tfrecord_writer):
     """Loads data from image and annotations files and add them to a TFRecord.
 
@@ -70,7 +70,7 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
 
 def get_dataset(dir, net='PNet'):
     #item = 'imglists/PNet/train_%s_raw.txt' % net
-    item = 'imglists/PNet/train_%s_landmark.txt' % net
+    item = os.path.join(data_dir,'imglists/PNet/train_%s_landmark.txt' % net)
     
     dataset_dir = os.path.join(dir, item)
     imagelist = open(dataset_dir, 'r')
@@ -122,5 +122,5 @@ def get_dataset(dir, net='PNet'):
 if __name__ == '__main__':
     dir = '.' 
     net = 'PNet'
-    output_directory = 'imglists/PNet'
+    output_directory = os.path.join(data_dir,'imglists/PNet')
     run(dir, net, output_directory, shuffling=True)

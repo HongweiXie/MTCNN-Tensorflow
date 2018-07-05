@@ -11,8 +11,8 @@ import random
 import tensorflow as tf
 import sys
 import numpy.random as npr
-dstdir = "24/train_RNet_landmark_aug"
-OUTPUT = '24'
+dstdir = "/home/sixd-ailabs/Develop/Human/Caffe/data/24/train_RNet_landmark_aug"
+OUTPUT = '/home/sixd-ailabs/Develop/Human/Caffe/data/24'
 if not exists(OUTPUT): os.mkdir(OUTPUT)
 if not exists(dstdir): os.mkdir(dstdir)
 assert(exists(dstdir) and exists(OUTPUT))
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     # train data
     net = "RNet"
     #train_txt = "train.txt"
-    train_txt = "trainImageList.txt"
+    train_txt = "/home/sixd-ailabs/Develop/Human/Face/train/trainImageList.txt"
     imgs,landmarks = GenerateData(train_txt, OUTPUT,net,argument=True)
     
    

@@ -17,12 +17,12 @@ def train_RNet(base_dir, prefix, end_epoch, display, lr):
     train(net_factory, prefix, end_epoch, base_dir, display=display, base_lr=lr)
 
 if __name__ == '__main__':
-    base_dir = '../prepare_data/imglists/RNet'
+    base_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data/imglists/RNet'
 
     model_name = 'MTCNN'
     model_path = '../data/%s_model/RNet_landmark/RNet' % model_name
     prefix = model_path
     end_epoch = 22
-    display = 1000
+    display = 100
     lr = 0.01
     train_RNet(base_dir, prefix, end_epoch, display, lr)

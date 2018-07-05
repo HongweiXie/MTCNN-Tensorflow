@@ -1,0 +1,9 @@
+prepare_data/24/
+test/Util.pyc
+test/result_landmark/
+test/*.jpg
+result
+.idea/
+backup/
+logs/
+data/

@@ -2,7 +2,7 @@ import numpy as np
 import numpy.random as npr
 import os
 
-data_dir = '.'
+data_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data'
 #anno_file = os.path.join(data_dir, "anno.txt")
 
 size = 12
@@ -46,10 +46,13 @@ with open(os.path.join(dir_path, "%s" %(net),"train_%s_landmark.txt" % (net)), "
     print(len(neg_keep), len(pos_keep), len(part_keep))
 
     for i in pos_keep:
-        f.write(pos[i])
+        line=data_dir+'/'+pos[i]
+        f.write(line)
     for i in neg_keep:
-        f.write(neg[i])
+        line=data_dir+'/'+neg[i]
+        f.write(line)
     for i in part_keep:
-        f.write(part[i])
+        line=data_dir+'/'+part[i]
+        f.write(line)
     for item in landmark:
         f.write(item)

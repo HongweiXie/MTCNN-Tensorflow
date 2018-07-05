@@ -2,7 +2,7 @@ import numpy as np
 import numpy.random as npr
 import os
 
-data_dir = '.'
+data_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data'
 #anno_file = os.path.join(data_dir, "anno.txt")
 
 size = 24

@@ -11,8 +11,8 @@ import random
 import tensorflow as tf
 import sys
 import numpy.random as npr
-dstdir = "48/train_ONet_landmark_aug"
-OUTPUT = '48'
+dstdir = "/home/sixd-ailabs/Develop/Human/Caffe/data/48/train_ONet_landmark_aug"
+OUTPUT = '/home/sixd-ailabs/Develop/Human/Caffe/data/48'
 if not exists(OUTPUT): os.mkdir(OUTPUT)
 if not exists(dstdir): os.mkdir(dstdir)
 assert(exists(dstdir) and exists(OUTPUT))
@@ -55,7 +55,7 @@ def GenerateData(ftxt, output,net,argument=False):
         print 'Net type error'
         return
     image_id = 0
-    f = open(join(OUTPUT,"landmark_%s_aug.txt" %(size)),'w')
+    f = open(join(OUTPUT,"landmark_%s.txt" %(size)),'w')
     data = getDataFromTxt(ftxt)
     idx = 0
     #image_path bbox landmark(5*2)
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     # train data
     net = "ONet"
     #train_txt = "train.txt"
-    train_txt = "trainImageList.txt"
+    train_txt = "/home/sixd-ailabs/Develop/Human/Face/train/trainImageList.txt"
     imgs,landmarks = GenerateData(train_txt, OUTPUT,net,argument=True)
     #WriteToTfrecord(imgs,landmarks,net)
    

@@ -9,7 +9,7 @@ from prepare_data.loader import TestLoader
 import cv2
 import os
 import numpy as np
-test_mode = "ONet"
+test_mode = "RNet"
 thresh = [0.9, 0.6, 0.7]
 min_face_size = 24
 stride = 2
@@ -56,13 +56,14 @@ for imagepath in gt_imdb:
     for bbox in all_boxes[count]:
         cv2.putText(image,str(np.round(bbox[4],2)),(int(bbox[0]),int(bbox[1])),cv2.FONT_HERSHEY_TRIPLEX,1,color=(255,0,255))
         cv2.rectangle(image, (int(bbox[0]),int(bbox[1])),(int(bbox[2]),int(bbox[3])),(0,0,255))
-        
-    for landmark in landmarks[count]:
-        for i in range(len(landmark)/2):
-            cv2.circle(image, (int(landmark[2*i]),int(int(landmark[2*i+1]))), 3, (0,0,255))
+    if landmarks[count] is not None:
+        for landmark in landmarks[count]:
+            for i in range(len(landmark) / 2):
+                cv2.circle(image, (int(landmark[2 * i]), int(int(landmark[2 * i + 1]))), 3, (0, 0, 255))
+
         
     count = count + 1
-    cv2.imwrite("result_landmark/onet_%d.png" %(count),image)
+    cv2.imwrite("result_landmark/rnet_%d.png" %(count),image)
     cv2.imshow("lala",image)
     cv2.waitKey(0)    
 

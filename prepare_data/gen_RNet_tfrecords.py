@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from tfrecord_utils import _process_image_withoutcoder, _convert_to_example_simple
 
-
+data_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data'
 def _add_to_tfrecord(filename, image_example, tfrecord_writer):
     """Loads data from image and annotations files and add them to a TFRecord.
 
@@ -27,14 +27,14 @@ def _add_to_tfrecord(filename, image_example, tfrecord_writer):
     tfrecord_writer.write(example.SerializeToString())
 
 
-def _get_output_filename(output_dir, name, net):
+def _get_output_filename(label,output_dir, name, net):
     #st = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     #return '%s/%s_%s_%s.tfrecord' % (output_dir, name, net, st)
     #return '%s/train_PNet_landmark.tfrecord' % (output_dir)
-    return '%s/landmark_landmark.tfrecord' % (output_dir)
+    return '%s/%s_landmark.tfrecord' % (output_dir,label)
     
 
-def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
+def run(dataset_dir, net, label,output_dir, name='MTCNN', shuffling=False):
     """Runs the conversion operation.
 
     Args:
@@ -43,12 +43,12 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
     """
     
     #tfrecord name 
-    tf_filename = _get_output_filename(output_dir, name, net)
+    tf_filename = _get_output_filename(label,output_dir, name, net)
     if tf.gfile.Exists(tf_filename):
         print('Dataset files already exist. Exiting without re-creating them.')
         return
     # GET Dataset, and shuffling.
-    dataset = get_dataset(dataset_dir, net=net)
+    dataset = get_dataset(label,dataset_dir, net=net)
     # filenames = dataset['filename']
     if shuffling:
         tf_filename = tf_filename + '_shuffle'
@@ -70,10 +70,11 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
     print('\nFinished converting the MTCNN dataset!')
 
 
-def get_dataset(dir, net='PNet'):
+def get_dataset(label,dir, net='PNet'):
     #item = 'imglists/PNet/train_%s_raw.txt' % net
     #item = 'imglists/PNet/train_%s_landmark.txt' % net
-    item = '%s/landmark_%s_aug.txt' % (net,net)
+    #item =  os.path.join(data_dir,'imglists/%s/train_%s_landmark.txt' % (net,net))
+    item=os.path.join(data_dir,'%s/%s_%s.txt'%(net_size,label,net_size))
     print item 
     dataset_dir = os.path.join(dir, item)
     imagelist = open(dataset_dir, 'r')
@@ -124,6 +125,7 @@ def get_dataset(dir, net='PNet'):
 
 if __name__ == '__main__':
     dir = '.' 
-    net = '24'
-    output_directory = 'imglists/RNet'
-    run(dir, net, output_directory, shuffling=True)
+    net = 'RNet'
+    net_size=24
+    output_directory = os.path.join(data_dir,'imglists/RNet')
+    run(dir, net, 'landmark',output_directory, shuffling=False)

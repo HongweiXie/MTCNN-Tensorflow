@@ -29,8 +29,11 @@ videopath = "./video_test.avi"
 mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
                                stride=stride, threshold=thresh, slide_window=slide_window)
 
-video_capture = cv2.VideoCapture(videopath)
-video_capture.set(3, 340)
+# Define the codec and create VideoWriter object
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+video = cv2.VideoWriter('result_landmark/output.avi', fourcc, 20.0, (640, 480))
+video_capture = cv2.VideoCapture(0)
+video_capture.set(3, 640)
 video_capture.set(4, 480)
 corpbbox = None
 while True:
@@ -51,7 +54,7 @@ while True:
             corpbbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
             # if score > thresh:
             cv2.rectangle(frame, (corpbbox[0], corpbbox[1]),
-                          (corpbbox[2], corpbbox[3]), (255, 0, 0), 1)
+                          (corpbbox[2], corpbbox[3]), (0, 255, 0), 1)
             cv2.putText(frame, '{:.3f}'.format(score), (corpbbox[0], corpbbox[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         (0, 0, 255), 2)
         cv2.putText(frame, '{:.4f}'.format(t) + " " + '{:.3f}'.format(fps), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
@@ -61,7 +64,9 @@ while True:
                 cv2.circle(frame, (int(landmarks[i][2*j]),int(int(landmarks[i][2*j+1]))), 2, (0,0,255))            
         # time end
         cv2.imshow("", frame)
+        video.write(frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            video.release()
             break
     else:
         print 'device not find'

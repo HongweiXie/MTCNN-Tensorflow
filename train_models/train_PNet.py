@@ -18,7 +18,7 @@ def train_PNet(base_dir, prefix, end_epoch, display, lr):
 
 if __name__ == '__main__':
     #data path
-    base_dir = '../prepare_data/imglists/PNet'
+    base_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data/imglists/PNet'
     model_name = 'MTCNN'
     #model_path = '../data/%s_model/PNet/PNet' % model_name
     #with landmark

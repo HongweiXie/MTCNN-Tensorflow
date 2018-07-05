@@ -6,11 +6,11 @@ import os
 import numpy.random as npr
 from utils import IoU
 anno_file = "wider_face_train.txt"
-im_dir = "WIDER_train/images"
-pos_save_dir = "12/positive"
-part_save_dir = "12/part"
-neg_save_dir = '12/negative'
-save_dir = "./12"
+im_dir = "/home/sixd-ailabs/Develop/Human/Face/WIDER_train/images"
+pos_save_dir = "/home/sixd-ailabs/Develop/Human/Caffe/data/12/positive"
+part_save_dir = "/home/sixd-ailabs/Develop/Human/Caffe/data/12/part"
+neg_save_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data/12/negative'
+save_dir = "/home/sixd-ailabs/Develop/Human/Caffe/data/12"
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 if not os.path.exists(pos_save_dir):

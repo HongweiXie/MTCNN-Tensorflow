@@ -9,8 +9,8 @@ from Detection.fcn_detector import FcnDetector
 from Detection.MtcnnDetector import MtcnnDetector
 import cv2
 import os
-data_dir = '/home/thinkjoy/chen_obj/FDDB/FDDB'
-out_dir = '/home/thinkjoy/chen_obj/FDDB/FDDB/mtcnn_landmark_result'
+data_dir = '/home/sixd-ailabs/Develop/Human/Face/FDDB'
+out_dir = '/home/sixd-ailabs/Develop/Human/Face/FDDB/FDDB_mtcnn_result'
 
 def get_imdb_fddb(data_dir):
     imdb = []
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         sys.stdout.write('%s ' % (i + 1))
         image_names_abs = [os.path.join(data_dir,'originalPics',image_name+'.jpg') for image_name in image_names]
         test_data = TestLoader(image_names_abs)
-        all_boxes,_ = mtcnn_detector.detect_face(test_data, vis=vis)
+        all_boxes,_ = mtcnn_detector.detect_face(test_data)
         
         for idx,im_name in enumerate(image_names):
             img_path = os.path.join(data_dir,'originalPics',im_name+'.jpg')

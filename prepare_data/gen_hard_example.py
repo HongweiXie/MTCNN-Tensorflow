@@ -30,14 +30,14 @@ def save_hard_example(net, data,save_path):
 
     
     # save files
-    neg_label_file = "%d/neg_%d.txt" % (net, image_size)
-    neg_file = open(neg_label_file, 'w')
+    neg_label_file = "neg_%d.txt" % (image_size)
+    neg_file = open(os.path.join(data_dir,neg_label_file), 'w')
 
-    pos_label_file = "%d/pos_%d.txt" % (net, image_size)
-    pos_file = open(pos_label_file, 'w')
+    pos_label_file = "pos_%d.txt" % (image_size)
+    pos_file = open(os.path.join(data_dir,pos_label_file), 'w')
 
-    part_label_file = "%d/part_%d.txt" % (net, image_size)
-    part_file = open(part_label_file, 'w')
+    part_label_file = "part_%d.txt" % (image_size)
+    part_file = open(os.path.join(data_dir,part_label_file), 'w')
     #read detect result
     det_boxes = pickle.load(open(os.path.join(save_path, 'detections.pkl'), 'rb'))
     # print(len(det_boxes), num_of_images)
@@ -150,7 +150,7 @@ def t_net(prefix, epoch,
         ONet = Detector(O_Net, 48, batch_size[2], model_path[2])
         detectors[2] = ONet
         
-    basedir = '.'    
+    basedir = '/home/sixd-ailabs/Develop/Human/Face'
     #anno_file
     filename = './wider_face_train_bbx_gt.txt'
     #read annatation(type:dict)
@@ -163,9 +163,9 @@ def t_net(prefix, epoch,
     # gt_imdb = imdb.gt_imdb()
     test_data = TestLoader(data['images'])
     #list
-    detections,_ = mtcnn_detector.detect_face(test_data)
-
-    save_net = 'RNet'
+    # detections,_ = mtcnn_detector.detect_face(test_data)
+    #
+    save_net = 'ONet'
     if test_mode == "PNet":
         save_net = "RNet"
     elif test_mode == "RNet":
@@ -173,13 +173,13 @@ def t_net(prefix, epoch,
     #save detect result
     save_path = os.path.join(data_dir, save_net)
     print save_path
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
-
-    save_file = os.path.join(save_path, "detections.pkl")
-    with open(save_file, 'wb') as f:
-        pickle.dump(detections, f,1)
-    print("%s测试完成开始OHEM" % image_size)
+    # if not os.path.exists(save_path):
+    #     os.mkdir(save_path)
+    #
+    # save_file = os.path.join(save_path, "detections.pkl")
+    # with open(save_file, 'wb') as f:
+    #     pickle.dump(detections, f,1)
+    # print("%s测试完成开始OHEM" % image_size)
     save_hard_example(image_size, data, save_path)
 
 
@@ -196,7 +196,7 @@ def parse_args():
     parser.add_argument('--batch_size', dest='batch_size', help='list of batch size used in prediction', nargs="+",
                         default=[2048, 256, 16], type=int)
     parser.add_argument('--thresh', dest='thresh', help='list of thresh for pnet, rnet, onet', nargs="+",
-                        default=[0.4, 0.05, 0.7], type=float)
+                        default=[0.6, 0.05, 0.7], type=float)
     parser.add_argument('--min_face', dest='min_face', help='minimum face size for detection',
                         default=24, type=int)
     parser.add_argument('--stride', dest='stride', help='stride of sliding window',
@@ -218,8 +218,8 @@ if __name__ == '__main__':
     if net == "ONet":
         image_size = 48
 
-    base_dir = '../prepare_data/WIDER_train'
-    data_dir = '%s' % str(image_size)
+    base_dir = '/home/sixd-ailabs/Develop/Human/Face/WIDER_train'
+    data_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data/%s' % str(image_size)
     
     neg_dir = get_path(data_dir, 'negative')
     pos_dir = get_path(data_dir, 'positive')
