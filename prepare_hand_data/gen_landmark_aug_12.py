@@ -5,14 +5,15 @@ import math
 from os.path import join, exists
 import cv2
 import numpy as np
-from BBox_utils import getDataFromTxt,processImage,shuffle_in_unison_scary,BBox
-from Landmark_utils import show_landmark,rotate,flip
+from prepare_data.BBox_utils import getDataFromTxt,processImage,shuffle_in_unison_scary,BBox
+from prepare_data.Landmark_utils import show_landmark,rotate,flip
 import random
 import tensorflow as tf
 import sys
 import numpy.random as npr
-dstdir = "/home/sixd-ailabs/Develop/Human/Caffe/data/12/train_PNet_landmark_aug"
-OUTPUT = '/home/sixd-ailabs/Develop/Human/Caffe/data/12'
+
+OUTPUT = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/12'
+dstdir = os.path.join(OUTPUT,"train_PNet_landmark_aug")
 if not exists(OUTPUT): os.mkdir(OUTPUT)
 if not exists(dstdir): os.mkdir(dstdir)
 assert(exists(dstdir) and exists(OUTPUT))
@@ -92,7 +93,7 @@ def GenerateData(ftxt, output,net,argument=False):
             if max(gt_w, gt_h) < 40 or x1 < 0 or y1 < 0:
                 continue
             #random shift
-            for i in range(10):
+            for i in range(20):
                 bbox_size = npr.randint(int(min(gt_w, gt_h) * 0.8), np.ceil(1.25 * max(gt_w, gt_h)))
                 delta_x = npr.randint(-gt_w * 0.2, gt_w * 0.2)
                 delta_y = npr.randint(-gt_h * 0.2, gt_h * 0.2)
@@ -185,7 +186,7 @@ if __name__ == '__main__':
     # train data
     net = "PNet"
     #train_txt = "train.txt"
-    train_txt = "/home/sixd-ailabs/Develop/Human/Face/train/trainImageList.txt"
+    train_txt = "/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt"
     imgs,landmarks = GenerateData(train_txt, OUTPUT,net,argument=True)
     
    

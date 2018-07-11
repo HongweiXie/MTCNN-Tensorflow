@@ -10,13 +10,13 @@ import cv2
 import os
 import numpy as np
 test_mode = "ONet"
-thresh = [0.9]
-min_face_size = 24
+thresh = [0.4]
+min_face_size = 80
 stride = 2
 slide_window = False
 shuffle = False
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_model/PNet_landmark/PNet']
+prefix = ['../data/MTCNN_model/Hand_PNet24_landmark/PNet']
 epoch = [30]
 batch_size = [2048]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
@@ -43,6 +43,8 @@ for imagepath in gt_imdb:
     print imagepath
     image = cv2.imread(imagepath)
     all_boxes, all_boxes_calib,_ = mtcnn_detector.detect_pnet(image)
+    if(all_boxes_calib is None):
+        continue
     for bbox in all_boxes_calib:
         cv2.putText(image,str(np.round(bbox[4],2)),(int(bbox[0]),int(bbox[1])),cv2.FONT_HERSHEY_TRIPLEX,1,color=(255,0,255))
         cv2.rectangle(image, (int(bbox[0]),int(bbox[1])),(int(bbox[2]),int(bbox[3])),(0,255,0))

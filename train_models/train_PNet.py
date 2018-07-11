@@ -18,11 +18,11 @@ def train_PNet(base_dir, prefix, end_epoch, display, lr):
 
 if __name__ == '__main__':
     #data path
-    base_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data/imglists/PNet'
+    base_dir = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/imglists/PNet'
     model_name = 'MTCNN'
     #model_path = '../data/%s_model/PNet/PNet' % model_name
     #with landmark
-    model_path = '../data/%s_model/PNet_landmark/PNet' % model_name
+    model_path = '../data/%s_model/Hand_PNet24_landmark/PNet' % model_name
             
     prefix = model_path
     end_epoch = 30

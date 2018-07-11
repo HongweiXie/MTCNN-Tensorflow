@@ -23,7 +23,7 @@ def read_single_tfrecord(tfrecord_file, batch_size, net):
         }
     )
     if net == 'PNet':
-        image_size = 12
+        image_size = 24
     elif net == 'RNet':
         image_size = 24
     else:

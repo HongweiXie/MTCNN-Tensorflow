@@ -2,7 +2,7 @@ import numpy as np
 import numpy.random as npr
 import os
 
-data_dir = '/home/sixd-ailabs/Develop/Human/Caffe/data'
+data_dir = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train'
 #anno_file = os.path.join(data_dir, "anno.txt")
 
 size = 12
@@ -23,7 +23,19 @@ with open(os.path.join(data_dir, '%s/neg_%s.txt' % (size, size)), 'r') as f:
 with open(os.path.join(data_dir, '%s/part_%s.txt' % (size, size)), 'r') as f:
     part = f.readlines()
 
-with open(os.path.join(data_dir,'%s/landmark_%s_aug.txt' %(size,size)), 'r') as f:
+with open(os.path.join(data_dir, '%s/g_pos_%s.txt' % (size, size)), 'r') as f:
+    g_pos = f.readlines()
+    pos+=g_pos
+
+with open(os.path.join(data_dir, '%s/g_neg_%s.txt' % (size, size)), 'r') as f:
+    g_neg = f.readlines()
+    neg+=g_neg
+
+with open(os.path.join(data_dir, '%s/g_part_%s.txt' % (size, size)), 'r') as f:
+    g_part = f.readlines()
+    part+=g_part
+
+with open(os.path.join(data_dir,'%s/landmark_aug.txt' %(size)), 'r') as f:
     landmark = f.readlines()
     
 dir_path = os.path.join(data_dir, 'imglists')
@@ -35,7 +47,7 @@ with open(os.path.join(dir_path, "%s" %(net),"train_%s_landmark.txt" % (net)), "
     nums = [len(neg), len(pos), len(part)]
     ratio = [3, 1, 1]
     #base_num = min(nums)
-    base_num = 200000
+    base_num = 20000
     print(len(neg), len(pos), len(part), base_num)
     if len(neg) > base_num * 3:
         neg_keep = npr.choice(len(neg), size=base_num * 3, replace=True)
@@ -44,9 +56,9 @@ with open(os.path.join(dir_path, "%s" %(net),"train_%s_landmark.txt" % (net)), "
     pos_keep = npr.choice(len(pos), size=base_num, replace=True)
     part_keep = npr.choice(len(part), size=base_num, replace=True)
 
-    pos_keep =range(0,len(pos))
-    neg_keep =range(0,base_num*3)
-    part_keep=range(0,len(part),3)
+    # pos_keep =range(0,len(pos))
+    # neg_keep =range(0,base_num*3)
+    # part_keep=range(0,len(part),3)
 
     print(len(neg_keep), len(pos_keep), len(part_keep))
 

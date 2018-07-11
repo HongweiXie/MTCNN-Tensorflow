@@ -109,10 +109,10 @@ def train(net_factory, prefix, end_epoch, base_dir,
         
     #RNet use 3 tfrecords to get data    
     else:
-        pos_dir = os.path.join(base_dir,'pos_landmark.tfrecord')
-        part_dir = os.path.join(base_dir,'part_landmark.tfrecord')
-        neg_dir = os.path.join(base_dir,'neg_landmark.tfrecord')
-        landmark_dir = os.path.join(base_dir,'landmark_landmark.tfrecord')
+        pos_dir = os.path.join(base_dir,'pos_landmark.tfrecord_shuffle')
+        part_dir = os.path.join(base_dir,'part_landmark.tfrecord_shuffle')
+        neg_dir = os.path.join(base_dir,'neg_landmark.tfrecord_shuffle')
+        landmark_dir = os.path.join(base_dir,'landmark_landmark.tfrecord_shuffle')
         dataset_dirs = [pos_dir,part_dir,neg_dir,landmark_dir]
         pos_radio = 1.0/6;part_radio = 1.0/6;landmark_radio=1.0/6;neg_radio=3.0/6
         pos_batch_size = int(np.ceil(config.BATCH_SIZE*pos_radio))
@@ -128,7 +128,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
         
     #landmark_dir    
     if net == 'PNet':
-        image_size = 12
+        image_size = 24
         radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 0.5;
     elif net == 'RNet':
         image_size = 24

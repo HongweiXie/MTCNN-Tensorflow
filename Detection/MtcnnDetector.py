@@ -91,10 +91,10 @@ class MtcnnDetector(object):
         -------
             bbox array
         """
-        stride = 2
-        #stride = 4
-        cellsize = 12
-        #cellsize = 25
+        #stride = 2
+        stride = 4
+        #cellsize = 12
+        cellsize = 25
 
         t_index = np.where(cls_map > threshold)
 
@@ -193,7 +193,7 @@ class MtcnnDetector(object):
             boxes after calibration
         """
         h, w, c = im.shape
-        net_size = 12
+        net_size = 24
         
         current_scale = float(net_size) / self.min_face_size  # find initial scale
         # print("current_scale", net_size, self.min_face_size, current_scale)

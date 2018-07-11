@@ -9,14 +9,14 @@ import cv2
 import numpy as np
 
 test_mode = "onet"
-thresh = [0.9, 0.6, 0.7]
-min_face_size = 24
+thresh = [0.6, 0.4, 0.5]
+min_face_size = 80
 stride = 2
 slide_window = False
 shuffle = False
 #vis = True
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_model/PNet_landmark/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet']
+prefix = ['../data/MTCNN_model/Hand_PNet24_landmark/PNet', '../data/MTCNN_model/Hand_RNet_landmark/RNet', '../data/MTCNN_model/Hand_ONet_landmark/ONet']
 epoch = [18, 14, 16]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 PNet = FcnDetector(P_Net, model_path[0])
@@ -32,7 +32,7 @@ mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 video = cv2.VideoWriter('result_landmark/output.avi', fourcc, 20.0, (640, 480))
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(1)
 video_capture.set(3, 640)
 video_capture.set(4, 480)
 corpbbox = None
@@ -61,7 +61,7 @@ while True:
                     (255, 0, 255), 2)
         for i in range(landmarks.shape[0]):
             for j in range(len(landmarks[i])/2):
-                cv2.circle(frame, (int(landmarks[i][2*j]),int(int(landmarks[i][2*j+1]))), 2, (0,0,255))            
+                cv2.circle(frame, (int(landmarks[i][2*j]),int(int(landmarks[i][2*j+1]))), 5, (55, 255, 155),2)
         # time end
         cv2.imshow("", frame)
         video.write(frame)
