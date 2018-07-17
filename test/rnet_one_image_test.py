@@ -10,14 +10,14 @@ import cv2
 import os
 import numpy as np
 test_mode = "RNet"
-thresh = [0.6, 0.6, 0.7]
+thresh = [0.6, 0.5, 0.7]
 min_face_size = 80
 stride = 2
 slide_window = False
 shuffle = False
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_model/Hand_PNet24_landmark/PNet', '../data/MTCNN_model/Hand_RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet']
-epoch = [30, 22, 16]
+prefix = ['../data/MTCNN_model/Hand_PNet24_landmark/PNet', '../data/MTCNN_hand/Hand_RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet']
+epoch = [18, 4, 16]
 batch_size = [2048, 256, 16]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 # load pnet model

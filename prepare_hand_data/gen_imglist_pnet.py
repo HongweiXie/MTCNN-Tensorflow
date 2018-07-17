@@ -35,9 +35,13 @@ with open(os.path.join(data_dir, '%s/g_part_%s.txt' % (size, size)), 'r') as f:
     g_part = f.readlines()
     part+=g_part
 
-with open(os.path.join(data_dir,'%s/landmark_aug.txt' %(size)), 'r') as f:
+with open(os.path.join(data_dir,'%s/landmark_24_aug.txt' %(size)), 'r') as f:
     landmark = f.readlines()
-    
+
+with open(os.path.join(data_dir,'%s/landmark_g_24_aug.txt' %(size)), 'r') as f:
+    g_landmark = f.readlines()
+    landmark+=g_landmark
+
 dir_path = os.path.join(data_dir, 'imglists')
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
@@ -47,7 +51,7 @@ with open(os.path.join(dir_path, "%s" %(net),"train_%s_landmark.txt" % (net)), "
     nums = [len(neg), len(pos), len(part)]
     ratio = [3, 1, 1]
     #base_num = min(nums)
-    base_num = 20000
+    base_num = 50000
     print(len(neg), len(pos), len(part), base_num)
     if len(neg) > base_num * 3:
         neg_keep = npr.choice(len(neg), size=base_num * 3, replace=True)

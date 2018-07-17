@@ -22,6 +22,7 @@ def save_hard_example(net, data,save_path):
     # format of each line: image/path [x1,y1,x2,y2] for each gt_box in this image
 
     im_idx_list = data['images']
+    landmark_dict=data['landmarks']
     # print(images[0])
     gt_boxes_list = data['bboxes']
     num_of_images = len(im_idx_list)
@@ -56,6 +57,11 @@ def save_hard_example(net, data,save_path):
     #det_boxes detect result(list)
     #gt_boxes_list gt(list)
     for im_idx, dets, gts in zip(im_idx_list, det_boxes, gt_boxes_list):
+        im_name=os.path.basename(im_idx)
+        landmark_bboxes=None
+        if landmark_dict is not None and landmark_dict.get(im_name) is not None:
+            landmark_bboxes=landmark_dict[im_name]
+
         gts = np.array(gts, dtype=np.float32).reshape(-1, 4)
         if image_done % 100 == 0:
             print("%d images done" % image_done)
@@ -86,9 +92,12 @@ def save_hard_example(net, data,save_path):
             resized_im = cv2.resize(cropped_im, (image_size, image_size),
                                     interpolation=cv2.INTER_LINEAR)
 
+            neg_threshold=0.3
+            if(landmark_bboxes is not None):
+                neg_threshold=0.2
             # save negative images and write label
             # Iou with all gts must below 0.3            
-            if len(Iou)<=0 or (np.max(Iou) < 0.3 and neg_num < 60):
+            if len(Iou)<=0 or (np.max(Iou) < neg_threshold and neg_num < 60):
                 #save the examples
                 save_file = os.path.join(neg_dir, "%s.jpg" % n_idx)
                 # print(save_file)
@@ -97,10 +106,22 @@ def save_hard_example(net, data,save_path):
                 n_idx += 1
                 neg_num += 1
             else:
+
                 # find gt_box with the highest iou
                 idx = np.argmax(Iou)
                 assigned_gt = gts[idx]
                 x1, y1, x2, y2 = assigned_gt
+
+                pos_threshold=0.65
+                part_threshold=0.45
+                if landmark_bboxes is not None:
+                    inner_bbox=findInnerBBox(x_left,y_top,x_right,y_bottom,landmark_bboxes)
+
+                    if inner_bbox is None:
+                        continue
+                    else:
+                        pos_threshold=0.5
+                        part_threshold=0.3
 
                 # compute bbox reg label
                 offset_x1 = (x1 - x_left) / float(width)
@@ -109,7 +130,7 @@ def save_hard_example(net, data,save_path):
                 offset_y2 = (y2 - y_bottom) / float(height)
 
                 # save positive and part-face images and write labels
-                if np.max(Iou) >= 0.65:
+                if np.max(Iou) >= pos_threshold:
                     save_file = os.path.join(pos_dir, "%s.jpg" % p_idx)
                     pos_file.write(save_file + ' 1 %.2f %.2f %.2f %.2f\n' % (
                         offset_x1, offset_y1, offset_x2, offset_y2))
@@ -117,7 +138,7 @@ def save_hard_example(net, data,save_path):
                     p_idx += 1
                     hit_flag=True
 
-                elif np.max(Iou) >= 0.4:
+                elif np.max(Iou) >= part_threshold:
                     save_file = os.path.join(part_dir, "%s.jpg" % d_idx)
                     part_file.write(save_file + ' -1 %.2f %.2f %.2f %.2f\n' % (
                         offset_x1, offset_y1, offset_x2, offset_y2))
@@ -199,7 +220,7 @@ def parse_args():
                         default=['../data/MTCNN_model/Hand_PNet24_landmark/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet/ONet'],
                         type=str)
     parser.add_argument('--epoch', dest='epoch', help='epoch number of model to load', nargs="+",
-                        default=[30, 14, 22], type=int)
+                        default=[18, 14, 22], type=int)
     parser.add_argument('--batch_size', dest='batch_size', help='list of batch size used in prediction', nargs="+",
                         default=[2048, 256, 16], type=int)
     parser.add_argument('--thresh', dest='thresh', help='list of thresh for pnet, rnet, onet', nargs="+",
@@ -226,7 +247,7 @@ if __name__ == '__main__':
         image_size = 48
 
     data_dir = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/%s' % str(image_size)
-    input_dirs= ['/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17','/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output']
+    input_dirs= ['/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17','/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output','/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell']
     
     neg_dir = os.path.join(data_dir, 'negative')
     pos_dir = os.path.join(data_dir, 'positive')

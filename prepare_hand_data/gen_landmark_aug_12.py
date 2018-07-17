@@ -56,9 +56,10 @@ def GenerateData(ftxt, output,net,argument=False):
         print 'Net type error'
         return
     image_id = 0
-    f = open(join(OUTPUT,"landmark_%s_aug.txt" %(size)),'w')
+
+
     #dstdir = "train_landmark_few"
-   
+    output_file = open(join(OUTPUT, "landmark_%s_aug.txt" % (size)), 'w')
     data = getDataFromTxt(ftxt)
     idx = 0
     #image_path bbox landmark(5*2)
@@ -128,9 +129,9 @@ def GenerateData(ftxt, output,net,argument=False):
                         F_imgs.append(face_flipped)
                         F_landmarks.append(landmark_flipped.reshape(10))
                     #rotate
-                    if random.choice([0,1]) > 0:
+                    for i in range(3):
                         face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), 5)#逆时针旋转
+                                                                         bbox.reprojectLandmark(landmark_), npr.randint(-30,30))#逆时针旋转
                         #landmark_offset
                         landmark_rotated = bbox.projectLandmark(landmark_rotated)
                         face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
@@ -143,19 +144,19 @@ def GenerateData(ftxt, output,net,argument=False):
                         F_imgs.append(face_flipped)
                         F_landmarks.append(landmark_flipped.reshape(10))                
                     
-                    #inverse clockwise rotation
-                    if random.choice([0,1]) > 0: 
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), -5)#顺时针旋转
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(10))
-                
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(10)) 
+                    # #inverse clockwise rotation
+                    # if random.choice([0,1]) > 0:
+                    #     face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
+                    #                                                      bbox.reprojectLandmark(landmark_), -5)#顺时针旋转
+                    #     landmark_rotated = bbox.projectLandmark(landmark_rotated)
+                    #     face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
+                    #     F_imgs.append(face_rotated_by_alpha)
+                    #     F_landmarks.append(landmark_rotated.reshape(10))
+                    #
+                    #     face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
+                    #     face_flipped = cv2.resize(face_flipped, (size, size))
+                    #     F_imgs.append(face_flipped)
+                    #     F_landmarks.append(landmark_flipped.reshape(10))
                     
             F_imgs, F_landmarks = np.asarray(F_imgs), np.asarray(F_landmarks)
             #print F_imgs.shape
@@ -171,15 +172,15 @@ def GenerateData(ftxt, output,net,argument=False):
 
                 cv2.imwrite(join(dstdir,"%d.jpg" %(image_id)), F_imgs[i])
                 landmarks = map(str,list(F_landmarks[i]))
-                f.write(join(dstdir,"%d.jpg" %(image_id))+" -2 "+" ".join(landmarks)+"\n")
+                output_file.write(join(dstdir,"%d.jpg" %(image_id))+" -2 "+" ".join(landmarks)+"\n")
                 image_id = image_id + 1
             
     #print F_imgs.shape
     #print F_landmarks.shape
     #F_imgs = processImage(F_imgs)
     #shuffle_in_unison_scary(F_imgs, F_landmarks)
-    
-    f.close()
+
+    output_file.close()
     return F_imgs,F_landmarks
 
 if __name__ == '__main__':
@@ -188,5 +189,6 @@ if __name__ == '__main__':
     #train_txt = "train.txt"
     train_txt = "/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt"
     imgs,landmarks = GenerateData(train_txt, OUTPUT,net,argument=True)
+
     
    

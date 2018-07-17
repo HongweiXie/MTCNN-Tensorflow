@@ -16,10 +16,10 @@ elif size == 48:
 
 with open(os.path.join(data_dir, '%s/pos_%s.txt' % (size, size)), 'r') as f:
     pos = f.readlines()
-with open(os.path.join(data_dir, '%s/pos_%s.txt' % (12, 12)), 'r') as f:
-    pos2 = f.readlines()
-with open(os.path.join(data_dir, '%s/g_pos_%s.txt' % (12, 12)), 'r') as f:
-    pos3 = f.readlines()
+# with open(os.path.join(data_dir, '%s/pos_%s.txt' % (12, 12)), 'r') as f:
+#     pos2 = f.readlines()
+# with open(os.path.join(data_dir, '%s/g_pos_%s.txt' % (12, 12)), 'r') as f:
+#     pos3 = f.readlines()
 
 with open(os.path.join(data_dir, '%s/neg_%s.txt' % (size, size)), 'r') as f:
     neg = f.readlines()
@@ -36,7 +36,8 @@ if not os.path.exists(dir_path):
 #write all data
 with open(os.path.join(dir_path, "train_%s_landmark.txt" % (net)), "w") as f:
     print len(neg)
-    print (len(pos)+len(pos2)+len(pos3))
+    print len(pos)
+    # print (len(pos)+len(pos2)+len(pos3))
     print len(part)
     print len(landmark)
     base_num=30000
@@ -46,11 +47,11 @@ with open(os.path.join(dir_path, "train_%s_landmark.txt" % (net)), "w") as f:
         neg_keep = npr.choice(len(neg), size=len(neg), replace=True)
     for i in np.arange(len(pos)):
         f.write(pos[i])
-    for i in np.arange(len(pos2)):
-        f.write(data_dir+'/'+pos2[i])
-    for i in np.arange(len(pos3)):
-        f.write(data_dir+'/'+pos3[i])
-    for i in neg_keep:
+    # for i in np.arange(len(pos2)):
+    #     f.write(data_dir+'/'+pos2[i])
+    # for i in np.arange(len(pos3)):
+    #     f.write(data_dir+'/'+pos3[i])
+    for i in np.arange(len(neg)):
         f.write(neg[i])
     for i in np.arange(len(part)):
         f.write(part[i])

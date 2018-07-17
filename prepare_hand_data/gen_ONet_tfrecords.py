@@ -128,5 +128,5 @@ if __name__ == '__main__':
     net = 'ONet'
     net_size = 48
     output_directory = os.path.join(data_dir,'imglists/ONet')
-    for label in ['pos']:
+    for label in ['landmark']:
         run(dir, net, label,output_directory, shuffling=True)

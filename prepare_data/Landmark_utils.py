@@ -31,7 +31,8 @@ def rotate(img, bbox, landmark, alpha):
         given a face with bbox and landmark, rotate with alpha
         and return rotated face with bbox, landmark (absolute position)
     """
-    center = ((bbox.left+bbox.right)/2, (bbox.top+bbox.bottom)/2)
+    # center = ((bbox.left+bbox.right)/2, (bbox.top+bbox.bottom)/2)
+    center =(landmark[1][0],landmark[1][1])
     rot_mat = cv2.getRotationMatrix2D(center, alpha, 1)
     #whole image rotate
     #pay attention: 3rd param(col*row)

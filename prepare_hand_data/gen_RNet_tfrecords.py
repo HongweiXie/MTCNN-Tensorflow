@@ -128,5 +128,5 @@ if __name__ == '__main__':
     net = 'RNet'
     net_size=24
     output_directory = os.path.join(data_dir,'imglists/RNet')
-    set_name=['pos_all','neg_select','part','landmark']
-    run(dir, net, set_name[2],output_directory, shuffling=False)
+    set_name=['pos','neg','part','landmark']
+    run(dir, net, set_name[0],output_directory, shuffling=True)
