@@ -4,6 +4,7 @@ import cv2
 from prepare_data.utils import IoU
 import glob
 from pascal_voc_io import PascalVocReader
+import tqdm
 
 def landmark_to_bbox(landmark):
     xmin=landmark[0][0]
@@ -15,12 +16,12 @@ def landmark_to_bbox(landmark):
         ymin=min(ymin,lm[1])
         xmax=max(lm[0],xmax)
         ymax=max(lm[1],ymax)
-    w=xmax-xmin
-    h=ymax-ymin
-    xmin+=w*0.1
-    xmax-=w*0.1
-    ymin+=h*0.1
-    ymax-=h*0.1
+    # w=xmax-xmin
+    # h=ymax-ymin
+    # xmin+=w*0.1
+    # xmax-=w*0.1
+    # ymin+=h*0.1
+    # ymax-=h*0.1
     return (int(xmin),int(ymin),int(xmax),int(ymax))
 
 def findInnerBBox(x1, y1, x2, y2,landmark_bboxes):
@@ -38,6 +39,7 @@ def read_voc_annotations(input_dirs):
     data['landmarks']=None
     landmark_dict = {}
     for input_dir in input_dirs:
+        print('read_annotation: ',input_dir)
         landmark_txt = os.path.join(input_dir, 'landmark.txt')
 
         if os.path.exists(landmark_txt):
@@ -50,8 +52,10 @@ def read_voc_annotations(input_dirs):
                 landmark = np.array(list(map(float, words[5:]))).reshape(-1, 2)
                 landmark_dict[words[0]].append(landmark_to_bbox(landmark))
             data['landmarks']=landmark_dict
-
-        for xml_file in glob.glob(input_dir + "/*.xml"):
+        else:
+            exit(1)
+        xml_list=sorted(glob.glob(input_dir + "/*.xml"))
+        for xml_file in tqdm.tqdm(xml_list):
             reader = PascalVocReader(xml_file)
             # image path
             im_path = xml_file[:-4] + ".jpg"
@@ -64,7 +68,7 @@ def read_voc_annotations(input_dirs):
                 xmax = points[2][0]
                 ymax = points[2][1]
                 label = shape[0]
-                if label.startswith('index') or label == 'point_l' or label == 'point_r':
+                if label.startswith('index') or label == 'point_l' or label == 'point_r' or label=='point':
                     bbox.append([xmin, ymin, xmax, ymax])
             bboxes.append(bbox)
             images.append(im_path)

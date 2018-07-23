@@ -8,6 +8,7 @@ from train_models.mtcnn_model import P_Net, R_Net, O_Net
 import cv2
 import numpy as np
 import dlib
+from process_book_reading import BookReader
 
 def convert2dlibbbox(bbox):
     cx=(bbox[0]+bbox[2])/2
@@ -21,12 +22,12 @@ def convert2dlibbbox(bbox):
     return dlib.rectangle(int(left),int(top),int(right),int(bottom))
 
 
-predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-Detector-Desktop_Qt_5_10_0_GCC_64bit-Default/Hand_5_Landmarks_Detector_100.dat'
+predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-Detector-Desktop_Qt_5_10_0_GCC_64bit-Default/Hand_5_Landmarks_Detector.dat'
 predictor = dlib.shape_predictor(predictor_path)
 
 test_mode = "onet"
 thresh = [0.6, 0.5, 0.7]
-min_face_size = 50
+min_face_size = 100
 stride = 2
 slide_window = False
 shuffle = False
@@ -47,11 +48,14 @@ mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-video = cv2.VideoWriter('result_landmark/output_onet.avi', fourcc, 20.0, (640, 480))
+video = cv2.VideoWriter('result_landmark/output_onet.avi', fourcc, 20.0, (1280, 720))
 video_capture = cv2.VideoCapture(1)
-video_capture.set(3, 640)
-video_capture.set(4, 480)
+video_capture.set(3, 1280)
+video_capture.set(4, 720)
 corpbbox = None
+
+reader=BookReader()
+
 while True:
     # fps = video_capture.get(cv2.CAP_PROP_FPS)
     t1 = cv2.getTickCount()
@@ -61,7 +65,7 @@ while True:
         image = np.array(frame)
         boxes_c,landmarks = mtcnn_detector.detect(image)
         
-        print landmarks.shape
+        # print landmarks.shape
         t2 = cv2.getTickCount()
         t = (t2 - t1) / cv2.getTickFrequency()
         fps = 1.0 / t
@@ -70,15 +74,20 @@ while True:
             score = boxes_c[i, 4]
             corpbbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
             shape = predictor(image, convert2dlibbbox(bbox))
-            for i in range(5):
-                pt = shape.part(i)
-                cv2.circle(frame, (int(pt.x), int(pt.y)), 5, (55, 255, 155),2)
-                print(shape.part(i))
-            # if score > thresh:
-            cv2.rectangle(frame, (corpbbox[0], corpbbox[1]),
-                          (corpbbox[2], corpbbox[3]), (0, 255, 0), 1)
-            cv2.putText(frame, '{:.3f}'.format(score), (corpbbox[0], corpbbox[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        (0, 0, 255), 2)
+            # for i in range(5):
+            #     pt = shape.part(i)
+            #     cv2.circle(frame, (int(pt.x), int(pt.y)), 5, (55, 255, 155),2)
+                # print(shape.part(i))
+
+            reader.on_detected_finger_tip(image,(shape.part(0).x,shape.part(0).y,cv2.getTickCount()))
+            break
+        # if boxes_c.shape[0]<=0:
+            # reader.on_detected_finger_tip(image, (-1,-1, cv2.getTickCount()))
+            # # if score > thresh:
+            # cv2.rectangle(frame, (corpbbox[0], corpbbox[1]),
+            #               (corpbbox[2], corpbbox[3]), (0, 255, 0), 1)
+            # cv2.putText(frame, '{:.3f}'.format(score), (corpbbox[0], corpbbox[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+            #             (0, 0, 255), 2)
         cv2.putText(frame, '{:.4f}'.format(t) + " " + '{:.3f}'.format(fps), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (255, 0, 255), 2)
         colors = [(55, 255, 155), (0, 255, 0), (0, 0, 255), (255, 0, 0), (0, 0, 0)]

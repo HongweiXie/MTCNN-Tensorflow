@@ -45,7 +45,7 @@ def IoU(box, boxes):
     inter = w * h
     ovr = inter*1.0 / (box_area + area - inter)
     return ovr
-def GenerateData(ftxt, output,net,argument=False):
+def GenerateData(ftxts, output,net,argument=False):
     if net == "PNet":
         size = 24
     elif net == "RNet":
@@ -56,10 +56,13 @@ def GenerateData(ftxt, output,net,argument=False):
         print 'Net type error'
         return
     image_id = 0
-    f = open(join(OUTPUT,"landmark_%s_aug.txt" %(size)),'w')
+    f = open(join(OUTPUT,"landmark_%s.txt" %(size)),'w')
     #dstdir = "train_landmark_few"
-   
-    data = getDataFromTxt(ftxt)
+
+    data = []
+    for ftxt in ftxts:
+        tmp = getDataFromTxt(ftxt)
+        data += tmp
     idx = 0
     #image_path bbox landmark(5*2)
     for (imgPath, bbox, landmarkGt) in data:
@@ -90,10 +93,10 @@ def GenerateData(ftxt, output,net,argument=False):
             gt_w = x2 - x1 + 1
             #gt's height
             gt_h = y2 - y1 + 1        
-            if max(gt_w, gt_h) < 40 or x1 < 0 or y1 < 0:
+            if max(gt_w, gt_h) < 80 or x1 < 0 or y1 < 0:
                 continue
             #random shift
-            for i in range(20):
+            for i in range(5):
                 bbox_size = npr.randint(int(min(gt_w, gt_h) * 0.8), np.ceil(1.25 * max(gt_w, gt_h)))
                 delta_x = npr.randint(-gt_w * 0.2, gt_w * 0.2)
                 delta_y = npr.randint(-gt_h * 0.2, gt_h * 0.2)
@@ -128,34 +131,35 @@ def GenerateData(ftxt, output,net,argument=False):
                         F_imgs.append(face_flipped)
                         F_landmarks.append(landmark_flipped.reshape(10))
                     #rotate
-                    if random.choice([0,1]) > 0:
+                    for i in range(1):
                         face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), 5)#逆时针旋转
+                                                                         bbox.reprojectLandmark(landmark_), npr.randint(-15,15))#逆时针旋转
                         #landmark_offset
                         landmark_rotated = bbox.projectLandmark(landmark_rotated)
                         face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
                         F_imgs.append(face_rotated_by_alpha)
                         F_landmarks.append(landmark_rotated.reshape(10))
                 
-                        #flip
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(10))                
+                        if random.choice([0, 1]) > 0:
+                            #flip
+                            face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
+                            face_flipped = cv2.resize(face_flipped, (size, size))
+                            F_imgs.append(face_flipped)
+                            F_landmarks.append(landmark_flipped.reshape(10))
                     
-                    #inverse clockwise rotation
-                    if random.choice([0,1]) > 0: 
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), -5)#顺时针旋转
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(10))
-                
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(10)) 
+                    # #inverse clockwise rotation
+                    # if random.choice([0,1]) > 0:
+                    #     face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
+                    #                                                      bbox.reprojectLandmark(landmark_), -5)#顺时针旋转
+                    #     landmark_rotated = bbox.projectLandmark(landmark_rotated)
+                    #     face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
+                    #     F_imgs.append(face_rotated_by_alpha)
+                    #     F_landmarks.append(landmark_rotated.reshape(10))
+                    #
+                    #     face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
+                    #     face_flipped = cv2.resize(face_flipped, (size, size))
+                    #     F_imgs.append(face_flipped)
+                    #     F_landmarks.append(landmark_flipped.reshape(10))
                     
             F_imgs, F_landmarks = np.asarray(F_imgs), np.asarray(F_landmarks)
             #print F_imgs.shape
@@ -186,7 +190,10 @@ if __name__ == '__main__':
     # train data
     net = "ONet"
     #train_txt = "train.txt"
-    train_txt = "/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt"
-    imgs,landmarks = GenerateData(train_txt, OUTPUT,net,argument=True)
+    train_txts = ["/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt",
+                  '/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output/landmark.txt',
+                  '/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell/landmark.txt']
+
+    imgs,landmarks = GenerateData(train_txts, OUTPUT,net,argument=True)
     
    

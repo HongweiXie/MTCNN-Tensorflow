@@ -10,14 +10,14 @@ import cv2
 import os
 import numpy as np
 test_mode = "ONet"
-thresh = [0.1]
+thresh = [0.8]
 min_face_size = 100
 stride = 2
 slide_window = False
 shuffle = False
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_model/Hand_PNet24_landmark/PNet']
-epoch = [22]
+prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_2/PNet']
+epoch = [18]
 batch_size = [2048]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 # load pnet model

@@ -95,10 +95,10 @@ def GenerateData(ftxts, output,net,argument=False):
             gt_w = x2 - x1 + 1
             #gt's height
             gt_h = y2 - y1 + 1        
-            if max(gt_w, gt_h) < 40 or x1 < 0 or y1 < 0:
+            if max(gt_w, gt_h) < 80 or x1 < 0 or y1 < 0:
                 continue
             #random shift
-            for i in range(20):
+            for i in range(5):
                 bbox_size = npr.randint(int(min(gt_w, gt_h) * 0.8), np.ceil(1.25 * max(gt_w, gt_h)))
                 # delta_x = npr.randint(-gt_w * 0.2, gt_w * 0.2)
                 # delta_y = npr.randint(-gt_h * 0.2, gt_h * 0.2)
@@ -108,12 +108,13 @@ def GenerateData(ftxts, output,net,argument=False):
                 # nx2 = nx1 + bbox_size
                 # ny2 = ny1 + bbox_size
 
+                offset_bias = 0
                 inner_xmin, inner_ymin, inner_xmax, inner_ymax = landmark_inner_bbox
                 inner_w = inner_xmax - inner_xmin + 1
                 inner_h = inner_ymax - inner_ymin + 1
-                bbox_size = max(bbox_size, inner_h + 1, inner_w + 1)
-                nx1 = npr.randint(max(0, inner_xmax - bbox_size, inner_xmin - 0.2 * gt_w), inner_xmin)
-                ny1 = npr.randint(max(0, inner_ymax - bbox_size, inner_ymin - 0.2 * gt_h), inner_ymin)
+                bbox_size = max(bbox_size, inner_h + 1, inner_w + 1) + offset_bias
+                nx1 = npr.randint(max(0, inner_xmax - bbox_size, x1 - 0.2 * gt_w), max(1, inner_xmin - offset_bias, x1))
+                ny1 = npr.randint(max(0, inner_ymax - bbox_size, y1 - 0.2 * gt_h), max(1, inner_ymin - offset_bias, y1))
                 nx2 = nx1 + bbox_size
                 ny2 = ny1 + bbox_size
 
@@ -124,7 +125,7 @@ def GenerateData(ftxts, output,net,argument=False):
                 resized_im = cv2.resize(cropped_im, (size, size))
                 #cal iou
                 iou = IoU(crop_box, np.expand_dims(gt_box,0))
-                if iou > 0.6:
+                if iou > 0.65:
                     F_imgs.append(resized_im)
                     #normalize
                     for index, one in enumerate(landmarkGt):
@@ -143,24 +144,25 @@ def GenerateData(ftxts, output,net,argument=False):
                         #c*h*w
                         F_imgs.append(face_flipped)
                         F_landmarks.append(landmark_flipped.reshape(10))
-                        # print(landmark_flipped)
+                        # print('landmark_flipped')
                         # show_landmark(face_flipped, landmark_flipped)
 
                     #rotate
-                    for i in range(2):
+                    for i in range(1):
                         face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), npr.randint(-45,45))#逆时针旋转
+                                                                         bbox.reprojectLandmark(landmark_), npr.randint(-15,15))#逆时针旋转
                         #landmark_offset
                         landmark_rotated = bbox.projectLandmark(landmark_rotated)
                         face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
                         F_imgs.append(face_rotated_by_alpha)
                         F_landmarks.append(landmark_rotated.reshape(10))
 
-                        #flip
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(10))
+                        if random.choice([0, 1]) > 0:
+                            #flip
+                            face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
+                            face_flipped = cv2.resize(face_flipped, (size, size))
+                            F_imgs.append(face_flipped)
+                            F_landmarks.append(landmark_flipped.reshape(10))
 
                     
                     # #inverse clockwise rotation
@@ -206,7 +208,7 @@ if __name__ == '__main__':
     # train data
     net = "ONet"
     #train_txt = "train.txt"
-    train_txts = ["/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt",'/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output/landmark.txt']
+    train_txts = ["/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt",'/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output/landmark.txt','/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell/landmark.txt']
     imgs,landmarks = GenerateData(train_txts, OUTPUT,net,argument=True)
     
    

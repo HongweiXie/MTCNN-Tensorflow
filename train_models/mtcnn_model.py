@@ -2,6 +2,7 @@
 import tensorflow as tf
 from tensorflow.contrib import slim
 import numpy as np
+from mobilenet_v2 import mobilenet_v2_base
 num_keep_radio = 0.7
 #define prelu
 def prelu(inputs):
@@ -120,11 +121,11 @@ def P_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
                         weights_regularizer=slim.l2_regularizer(0.0005), 
                         padding='valid'):
         print inputs.get_shape()
-        net = slim.conv2d(inputs, 10, 3, stride=1,scope='conv1')
+        net = slim.conv2d(inputs, 16, 3, stride=1,scope='conv1')
         print net.get_shape()
         net = slim.max_pool2d(net, kernel_size=[2,2], stride=2, scope='pool1', padding='SAME')
         print net.get_shape()
-        net = slim.conv2d(net,num_outputs=16,kernel_size=[3,3],stride=1,scope='conv2')
+        net = slim.conv2d(net,num_outputs=24,kernel_size=[3,3],stride=1,scope='conv2')
         print net.get_shape()
         net = slim.max_pool2d(net, kernel_size=[2, 2], stride=2, scope='pool2', padding='SAME')
         print net.get_shape()
@@ -254,7 +255,71 @@ def O_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
             return cls_loss,bbox_loss,landmark_loss,L2_loss,accuracy
         else:
             return cls_prob,bbox_pred,landmark_pred
-            
-        
+from collections import namedtuple
+def O_MobileNetv2(inputs,label=None,bbox_target=None,landmark_target=None,training=True):
+    # _CONV_DEFS specifies the MobileNet body
+    Conv = namedtuple('Conv', ['kernel', 'stride', 'depth'])
+    InvertedResidual = namedtuple('InvertedResidual',
+                                  ['kernel', 'stride', 'depth', 'num', 't'])  # t is the expension factor
+    _CONV_DEFS = [
+        Conv(kernel=[3, 3], stride=2, depth=32),
+        InvertedResidual(kernel=[3, 3], stride=1, depth=16, num=1, t=1),
+        InvertedResidual(kernel=[3, 3], stride=2, depth=24, num=2, t=6),
+        InvertedResidual(kernel=[3, 3], stride=2, depth=32, num=2, t=6),
+        InvertedResidual(kernel=[3, 3], stride=2, depth=64, num=2, t=6),
+        InvertedResidual(kernel=[3, 3], stride=1, depth=96, num=3, t=6),
+        InvertedResidual(kernel=[3, 3], stride=2, depth=160, num=3, t=6),
+        InvertedResidual(kernel=[3, 3], stride=1, depth=320, num=1, t=6),
+        Conv(kernel=[1, 1], stride=1, depth=1280)
+    ]
+    with slim.arg_scope([slim.conv2d],
+                        activation_fn = prelu,
+                        weights_initializer=slim.xavier_initializer(),
+                        biases_initializer=tf.zeros_initializer(),
+                        weights_regularizer=slim.l2_regularizer(0.0005),
+                        padding='valid'):
+        print inputs.get_shape()
+        net,endpoint = mobilenet_v2_base(inputs,'InvertedResidual_64_2')
+        print net.get_shape()
+        fc_flatten = slim.flatten(net)
+        print fc_flatten.get_shape()
+        fc1 = slim.fully_connected(fc_flatten, num_outputs=256,scope="fc1", activation_fn=prelu)
+        print fc1.get_shape()
+        #batch*2
+        cls_prob = slim.fully_connected(fc1,num_outputs=2,scope="cls_fc",activation_fn=tf.nn.softmax)
+        print cls_prob.get_shape()
+        #batch*4
+        bbox_pred = slim.fully_connected(fc1,num_outputs=4,scope="bbox_fc",activation_fn=None)
+        print bbox_pred.get_shape()
+        #batch*10
+        landmark_pred = slim.fully_connected(fc1,num_outputs=10,scope="landmark_fc",activation_fn=None)
+        print landmark_pred.get_shape()
+        #train
+        if training:
+            cls_loss = cls_ohem(cls_prob,label)
+            bbox_loss = bbox_ohem(bbox_pred,bbox_target,label)
+            accuracy = cal_accuracy(cls_prob,label)
+            landmark_loss = landmark_ohem(landmark_pred, landmark_target,label)
+            L2_loss = tf.add_n(slim.losses.get_regularization_losses())
+            return cls_loss,bbox_loss,landmark_loss,L2_loss,accuracy
+        else:
+            return cls_prob,bbox_pred,landmark_pred
+
         
                                                                   
+def _inverted_residual_bottleneck(inputs, depth, stride, expand_ratio, scope=None):
+  with tf.variable_scope(scope, 'InvertedResidual', [inputs]) as sc:
+    depth_in = slim.utils.last_dimension(inputs.get_shape(), min_rank=4)
+    output = slim.conv2d(inputs, expand_ratio*inputs.get_shape().as_list()[-1], 1, stride=1,
+                              activation_fn=tf.nn.relu6, normalizer_fn=slim.batch_norm, scope='conv')
+    output = slim.separable_conv2d(output, None, 3, depth_multiplier=1, stride=stride,
+                              activation_fn=tf.nn.relu6, normalizer_fn=slim.batch_norm, scope='depthwise')
+    output = slim.conv2d(output, depth, 1, stride=1,
+                              activation_fn=None, normalizer_fn=slim.batch_norm, scope='pointwise')
+
+    if stride==1 and depth==depth_in:
+      shortcut = inputs
+      output = shortcut + output
+
+    return output
+

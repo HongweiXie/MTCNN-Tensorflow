@@ -16,7 +16,7 @@ slide_window = False
 shuffle = False
 #vis = True
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_model/Hand_PNet24_landmark/PNet', '../data/MTCNN_model/Hand_RNet_landmark/RNet', '../data/MTCNN_model/Hand_ONet_landmark/ONet']
+prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_2/PNet', '../data/MTCNN_model/Hand_RNet_landmark/RNet', '../data/MTCNN_model/Hand_ONet_landmark/ONet']
 epoch = [18, 14, 16]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 PNet = FcnDetector(P_Net, model_path[0])
@@ -25,14 +25,14 @@ detectors[0] = PNet
 # detectors[1] = RNet
 # ONet = Detector(O_Net, 48, 1, model_path[2])
 # detectors[2] = ONet
-videopath = "./video_test.avi"
+videopath = "./test_input.avi"
 mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
                                stride=stride, threshold=thresh, slide_window=slide_window)
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-video = cv2.VideoWriter('result_landmark/output.avi', fourcc, 20.0, (640, 480))
-video_capture = cv2.VideoCapture(1)
+video = cv2.VideoWriter('result_landmark/output_pnet.avi', fourcc, 20.0, (640, 480))
+video_capture = cv2.VideoCapture(videopath)
 video_capture.set(3, 640)
 video_capture.set(4, 480)
 corpbbox = None

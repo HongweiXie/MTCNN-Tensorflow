@@ -363,7 +363,7 @@ class MtcnnDetector(object):
         # rnet
         t2 = 0
         if self.rnet_detector:
-            boxes, boxes_c,_ = self.detect_rnet(img, boxes_c)
+            boxes, boxes_c,landmark = self.detect_rnet(img, boxes_c)
             if boxes_c is None:
                 return np.array([]),np.array([])
     
@@ -379,9 +379,9 @@ class MtcnnDetector(object):
     
             t3 = time.time() - t
             t = time.time()
-            print(
-                "time cost " + '{:.3f}'.format(t1 + t2 + t3) + '  pnet {:.3f}  rnet {:.3f}  onet {:.3f}'.format(t1, t2,
-                                                                                                                t3))
+            # print(
+            #     "time cost " + '{:.3f}'.format(t1 + t2 + t3) + '  pnet {:.3f}  rnet {:.3f}  onet {:.3f}'.format(t1, t2,
+            #                                                                                                     t3))
     
         return boxes_c,landmark
     def detect_face(self, test_data):

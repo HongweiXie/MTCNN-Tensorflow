@@ -1,5 +1,6 @@
 #coding:utf-8
 from mtcnn_model import O_Net
+from mtcnn_model import O_MobileNetv2
 from train import train
 
 

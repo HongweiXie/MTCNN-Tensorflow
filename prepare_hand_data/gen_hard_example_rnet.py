@@ -15,6 +15,9 @@ from Detection.fcn_detector import FcnDetector
 from Detection.MtcnnDetector import MtcnnDetector
 from prepare_data.utils import *
 from data_util import *
+
+
+need_detection=True
 #net : 24(RNet)/48(ONet)
 #data: dict()
 def save_hard_example(net, data,save_path):
@@ -83,7 +86,7 @@ def save_hard_example(net, data,save_path):
             height = y_bottom - y_top + 1
 
             # ignore box that is too small or beyond image border
-            if width < 20 or x_left < 0 or y_top < 0 or x_right > img.shape[1] - 1 or y_bottom > img.shape[0] - 1:
+            if width < 80 or x_left < 0 or y_top < 0 or x_right > img.shape[1] - 1 or y_bottom > img.shape[0] - 1:
                 continue
 
             # compute intersection over union(IoU) between current box and all gt boxes
@@ -112,16 +115,16 @@ def save_hard_example(net, data,save_path):
                 assigned_gt = gts[idx]
                 x1, y1, x2, y2 = assigned_gt
 
-                pos_threshold=0.65
-                part_threshold=0.45
+
                 if landmark_bboxes is not None:
                     inner_bbox=findInnerBBox(x_left,y_top,x_right,y_bottom,landmark_bboxes)
 
                     if inner_bbox is None:
-                        continue
+                        pos_threshold = 0.65
+                        part_threshold = 0.5
                     else:
-                        pos_threshold=0.5
-                        part_threshold=0.3
+                        pos_threshold=0.6
+                        part_threshold=0.4
 
                 # compute bbox reg label
                 offset_x1 = (x1 - x_left) / float(width)
@@ -157,56 +160,60 @@ def t_net(prefix, epoch,
              batch_size, test_mode="PNet",
              thresh=[0.6, 0.6, 0.7], min_face_size=25,
              stride=2, slide_window=False, shuffle=False, vis=False):
-    detectors = [None, None, None]
-    print("Test model: ", test_mode)
-    #PNet-echo
-    model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
-    print(model_path[0])
-    # load pnet model
-    if slide_window:
-        PNet = Detector(P_Net, 12, batch_size[0], model_path[0])
-    else:
-        PNet = FcnDetector(P_Net, model_path[0])
-    detectors[0] = PNet
-
-    # load rnet model
-    if test_mode in ["RNet", "ONet"]:
-        print("==================================", test_mode)
-        RNet = Detector(R_Net, 24, batch_size[1], model_path[1])
-        detectors[1] = RNet
-
-    # load onet model
-    if test_mode == "ONet":
-        print("==================================", test_mode)
-        ONet = Detector(O_Net, 48, batch_size[2], model_path[2])
-        detectors[2] = ONet
-
     #read annatation(type:dict)
     data = read_voc_annotations(input_dirs)
-    mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
-                                   stride=stride, threshold=thresh, slide_window=slide_window)
-    print("==================================")
-    # 注意是在“test”模式下
-    # imdb = IMDB("wider", image_set, root_path, dataset_path, 'test')
-    # gt_imdb = imdb.gt_imdb()
-    test_data = TestLoader(data['images'])
-    # list
-    detections,_ = mtcnn_detector.detect_face(test_data)
-
     save_net = 'xx'
     if test_mode == "PNet":
         save_net = "RNet"
     elif test_mode == "RNet":
         save_net = "ONet"
-    #save detect result
+    # save detect result
     save_path = os.path.join(data_dir, save_net)
     print save_path
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
 
-    save_file = os.path.join(save_path, "detections.pkl")
-    with open(save_file, 'wb') as f:
-        pickle.dump(detections, f,1)
+    if need_detection:
+        detectors = [None, None, None]
+        print("Test model: ", test_mode)
+        # PNet-echo
+        model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
+        print(model_path[0])
+        # load pnet model
+        if slide_window:
+            PNet = Detector(P_Net, 12, batch_size[0], model_path[0])
+        else:
+            PNet = FcnDetector(P_Net, model_path[0])
+        detectors[0] = PNet
+
+        # load rnet model
+        if test_mode in ["RNet", "ONet"]:
+            print("==================================", test_mode)
+            RNet = Detector(R_Net, 24, batch_size[1], model_path[1])
+            detectors[1] = RNet
+
+        # load onet model
+        if test_mode == "ONet":
+            print("==================================", test_mode)
+            ONet = Detector(O_Net, 48, batch_size[2], model_path[2])
+            detectors[2] = ONet
+
+        mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
+                                   stride=stride, threshold=thresh, slide_window=slide_window)
+        print("==================================")
+        # 注意是在“test”模式下
+        # imdb = IMDB("wider", image_set, root_path, dataset_path, 'test')
+        # gt_imdb = imdb.gt_imdb()
+        test_data = TestLoader(data['images'])
+        # list
+        detections, _ = mtcnn_detector.detect_face(test_data)
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+
+        save_file = os.path.join(save_path, "detections.pkl")
+        with open(save_file, 'wb') as f:
+            pickle.dump(detections, f, 1)
+
+
+
     print("%s测试完成开始OHEM" % image_size)
     save_hard_example(image_size, data, save_path)
 
@@ -217,16 +224,16 @@ def parse_args():
     parser.add_argument('--test_mode', dest='test_mode', help='test net type, can be pnet, rnet or onet',
                         default='PNet', type=str)
     parser.add_argument('--prefix', dest='prefix', help='prefix of model name', nargs="+",
-                        default=['../data/MTCNN_model/Hand_PNet24_landmark/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet/ONet'],
+                        default=['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_2/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet/ONet'],
                         type=str)
     parser.add_argument('--epoch', dest='epoch', help='epoch number of model to load', nargs="+",
                         default=[18, 14, 22], type=int)
     parser.add_argument('--batch_size', dest='batch_size', help='list of batch size used in prediction', nargs="+",
                         default=[2048, 256, 16], type=int)
     parser.add_argument('--thresh', dest='thresh', help='list of thresh for pnet, rnet, onet', nargs="+",
-                        default=[0.1, 0.05, 0.7], type=float)
+                        default=[0.3, 0.05, 0.7], type=float)
     parser.add_argument('--min_face', dest='min_face', help='minimum face size for detection',
-                        default=80, type=int)
+                        default=100, type=int)
     parser.add_argument('--stride', dest='stride', help='stride of sliding window',
                         default=2, type=int)
     parser.add_argument('--sw', dest='slide_window', help='use sliding window in pnet', action='store_true')
@@ -247,7 +254,7 @@ if __name__ == '__main__':
         image_size = 48
 
     data_dir = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/%s' % str(image_size)
-    input_dirs= ['/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17','/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output','/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell']
+    input_dirs= ['/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell','/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17','/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output']
     
     neg_dir = os.path.join(data_dir, 'negative')
     pos_dir = os.path.join(data_dir, 'positive')

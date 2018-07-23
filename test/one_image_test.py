@@ -4,7 +4,7 @@ sys.path.append('..')
 from Detection.MtcnnDetector import MtcnnDetector
 from Detection.detector import Detector
 from Detection.fcn_detector import FcnDetector
-from train_models.mtcnn_model import P_Net, R_Net, O_Net
+from train_models.mtcnn_model import P_Net, R_Net, O_Net,O_MobileNetv2
 from prepare_data.loader import TestLoader
 import cv2
 import os
@@ -68,10 +68,10 @@ for imagepath in gt_imdb:
             cv2.circle(image, (int(pt.x),int(pt.y)), 3, (0, 0, 255))
             print(shape.part(i))
 
-    # for landmark in landmarks[count]:
-    #     for i in range(len(landmark)/2):
-    #         cv2.circle(image, (int(landmark[2*i]),int(int(landmark[2*i+1]))), 3, (0,0,255))
-    #
+    for landmark in landmarks[count]:
+        for i in range(len(landmark)/2):
+            cv2.circle(image, (int(landmark[2*i]),int(int(landmark[2*i+1]))), 3, (255,0,255),-1)
+
     count = count + 1
     cv2.imwrite("result_landmark/onet_%d.png" %(count),image)
     cv2.imshow("lala",image)

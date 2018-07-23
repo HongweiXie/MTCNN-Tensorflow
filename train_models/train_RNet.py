@@ -20,9 +20,9 @@ if __name__ == '__main__':
     base_dir = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/imglists/RNet'
 
     model_name = 'MTCNN'
-    model_path = '../data/%s_hand/Hand_RNet_landmark/RNet' % model_name
+    model_path = '../data/%s_hand/Hand_RNet_landmark_2/RNet' % model_name
     prefix = model_path
-    end_epoch = 4
+    end_epoch = 20
     display = 100
     lr = 0.01
     train_RNet(base_dir, prefix, end_epoch, display, lr)

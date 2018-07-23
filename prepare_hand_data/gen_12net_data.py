@@ -7,8 +7,8 @@ import numpy.random as npr
 from prepare_data.utils import IoU
 import glob
 from pascal_voc_io import PascalVocReader
-
-input_dirs = ['/home/sixd-ailabs/Develop/Human/Hand/diandu/youeryuan_dell',"/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17"]
+#input_dirs=["/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17"]
+input_dirs = ['/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell',"/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17","/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output"]
 save_dir = "/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/12"
 pos_save_dir = os.path.join(save_dir,'positive')
 part_save_dir = os.path.join(save_dir,'part')
@@ -29,7 +29,8 @@ f2 = open(os.path.join(save_dir, 'neg_12.txt'), 'w')
 f3 = open(os.path.join(save_dir, 'part_12.txt'), 'w')
 
 
-min_hand=80
+min_hand=100
+# max_hand=360
 
 p_idx = 0 # positive
 n_idx = 0 # negative
@@ -74,6 +75,8 @@ for input_dir in input_dirs:
                 landmark_dict[words[0]]=[]
             landmark=np.array(list(map(float, words[5:]))).reshape(-1,2)
             landmark_dict[words[0]].append(landmark_to_bbox(landmark))
+    else:
+        exit(1)
 
     for xml_file in glob.glob(input_dir + "/*.xml"):
         reader = PascalVocReader(xml_file)
@@ -91,7 +94,7 @@ for input_dir in input_dirs:
             xmax = points[2][0]
             ymax = points[2][1]
             label = shape[0]
-            if label.find('index')>=0 or label.find('point')>=0:
+            if label.find('index')>=0 or label=='point_l' or label=='point_r':
                 bbox.append(xmin)
                 bbox.append(ymin)
                 bbox.append(xmax)
@@ -120,7 +123,7 @@ for input_dir in input_dirs:
 
         neg_num = 0
         # 1---->50
-        while neg_num < 10:
+        while neg_num < 20:
             # neg_num's size [40,min(width, height) / 2],min_size:40
             size = npr.randint(min_hand, min(width, height) / 2)
             # top_left
@@ -158,7 +161,7 @@ for input_dir in input_dirs:
                 # generate positive examples and part faces
             for i in range(10):
                 # pos and part face size [minsize*0.8,maxsize*1.25]
-                size = npr.randint(int(min(w, h) * 0.8), np.ceil(1.2 * max(w, h)))
+                size = npr.randint(int(min(w, h) * 0.8), np.ceil(1.25 * max(w, h)))
                 deta = 0.2
                 # delta here is the offset of box center
                 delta_x = npr.randint(-w * deta, w * deta)
@@ -208,13 +211,13 @@ for input_dir in input_dirs:
 
             # ignore small faces
             # in case the ground truth boxes of small faces are not accurate
-            if max(w, h) < 40 or x1 < 0 or y1 < 0:
+            if max(w, h) < min_hand or x1 < 0 or y1 < 0:
                 continue
             for i in range(5):
                 size = npr.randint(min_hand, min(width, height) / 2)
                 # delta_x and delta_y are offsets of (x1, y1)
-                delta_x = npr.randint(max(-size, -x1), w)
-                delta_y = npr.randint(max(-size, -y1), h)
+                delta_x = npr.randint(max(-size, -w), w)
+                delta_y = npr.randint(max(-size, -h), h)
                 nx1 = int(max(0, x1 + delta_x))
                 ny1 = int(max(0, y1 + delta_y))
                 if nx1 + size > width or ny1 + size > height:
@@ -233,7 +236,7 @@ for input_dir in input_dirs:
                     n_idx += 1
                     # generate positive examples and part faces
             for i in range(30):
-                pos_threshold=0.65
+                pos_threshold=0.6
                 part_threshold=0.4
                 if landmark_bbox is None:
                     # pos and part face size [minsize*0.8,maxsize*1.25]
@@ -254,7 +257,7 @@ for input_dir in input_dirs:
                     nx2 = nx1 + size
                     ny2 = ny1 + size
 
-                    pos_threshold = 0.65
+                    pos_threshold = 0.75
                     part_threshold = 0.55
                 else:
                     # pos and part face size [minsize*0.8,maxsize*1.25]
@@ -263,10 +266,19 @@ for input_dir in input_dirs:
                     inner_w=inner_xmax-inner_xmin+1
                     inner_h=inner_ymax-inner_ymin+1
                     size=max(size,inner_h+1,inner_w+1)
-                    nx1=npr.randint(max(0,inner_xmax-size,inner_xmin-0.2*w),inner_xmin)
-                    ny1=npr.randint(max(0,inner_ymax-size,inner_ymin-0.2*h),inner_ymin)
+                    nx1=npr.randint(max(0,inner_xmax-size,x1-0.2*w),inner_xmin)
+                    ny1=npr.randint(max(0,inner_ymax-size,y1-0.2*h),inner_ymin)
                     nx2 = nx1 + size
                     ny2 = ny1 + size
+
+                    # rec_x=int(max(0,inner_xmax-int(np.ceil(1.25 * max(w, h))),x1-0.2*w))
+                    # rec_y=int(max(0,inner_ymax-int(np.ceil(1.25 * max(w, h))),y1-0.2*h))
+                    # frame=np.copy(img)
+                    # cv2.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),3)
+                    # cv2.rectangle(frame,(inner_xmin,inner_ymin),(inner_xmin+int(min(w, h) * 0.8),inner_ymin+int(min(w, h) * 0.8)),(255,0,0),3)
+                    # cv2.rectangle(frame,(rec_x,rec_y),(rec_x+int(np.ceil(1.25 * max(w, h))),rec_y+int(np.ceil(1.25 * max(w, h)))),(0,0,255),3)
+                    # cv2.imshow("img",frame)
+                    # cv2.waitKey(0)
 
                 if nx2 > width or ny2 > height:
                     continue

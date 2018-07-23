@@ -12,6 +12,7 @@ from mtcnn_model import P_Net
 import random
 import numpy.random as npr
 import cv2
+from prepare_data.Landmark_utils import show_landmark
 def train_model(base_lr, loss, data_num):
     """
     train model
@@ -21,7 +22,7 @@ def train_model(base_lr, loss, data_num):
     :return:
     train_op, lr_op
     """
-    lr_factor = 0.1
+    lr_factor = 0.5
     global_step = tf.Variable(0, trainable=False)
     #LR_EPOCH [8,14]
     #boundaried [num_batch,num_batch]
@@ -56,7 +57,7 @@ def random_flip_images(image_batch,label_batch,landmark_batch):
     return image_batch,landmark_batch
 '''
 # all mini-batch mirror
-def random_flip_images(image_batch,label_batch,landmark_batch):
+def random_flip_images(image_batch,label_batch,bbox_batch,landmark_batch):
     #mirror
     if random.choice([0,1]) > 0:
         num_images = image_batch.shape[0]
@@ -66,17 +67,25 @@ def random_flip_images(image_batch,label_batch,landmark_batch):
         flipindexes = np.concatenate((fliplandmarkindexes,flipposindexes))
         #random flip    
         for i in flipindexes:
-            cv2.flip(image_batch[i],1,image_batch[i])        
+            # cv2.imshow('ori',image_batch[i])
+            cv2.flip(image_batch[i],1,image_batch[i])
+            # cv2.imshow('flip',image_batch[i])
+            # cv2.waitKey(0)
+            bbox_=bbox_batch[i]
+            tmp=bbox_batch[i][0]
+            bbox_batch[i][0]=bbox_batch[i][2]
+            bbox_batch[i][2]=tmp
         
         #pay attention: flip landmark    
         for i in fliplandmarkindexes:
             landmark_ = landmark_batch[i].reshape((-1,2))
             landmark_ = np.asarray([(1-x, y) for (x, y) in landmark_])
-            landmark_[[0, 1]] = landmark_[[1, 0]]#left eye<->right eye
-            landmark_[[3, 4]] = landmark_[[4, 3]]#left mouth<->right mouth        
+            # landmark_[[0, 1]] = landmark_[[1, 0]]#left eye<->right eye
+            # landmark_[[3, 4]] = landmark_[[4, 3]]#left mouth<->right mouth
             landmark_batch[i] = landmark_.ravel()
-        
-    return image_batch,landmark_batch
+            # show_landmark(image_batch[i]*128+127.5,landmark_)
+
+    return image_batch,bbox_batch,landmark_batch
 
 def train(net_factory, prefix, end_epoch, base_dir,
           display=200, base_lr=0.01):
@@ -91,6 +100,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
     :return:
     """
     net = prefix.split('/')[-1]
+
     #label file
     label_file = os.path.join(base_dir,'train_%s_landmark.txt' % net)
     #label_file = os.path.join(base_dir,'landmark_12_few.txt')
@@ -124,8 +134,8 @@ def train(net_factory, prefix, end_epoch, base_dir,
         landmark_batch_size = int(np.ceil(config.BATCH_SIZE*landmark_radio))
         assert landmark_batch_size != 0,"Batch Size Error "
         batch_sizes = [pos_batch_size,part_batch_size,neg_batch_size,landmark_batch_size]
-        image_batch, label_batch, bbox_batch,landmark_batch = read_multi_tfrecords(dataset_dirs,batch_sizes, net)        
-        
+        image_batch, label_batch, bbox_batch,landmark_batch = read_multi_tfrecords(dataset_dirs,batch_sizes, net)
+
     #landmark_dir    
     if net == 'PNet':
         image_size = 24
@@ -134,9 +144,9 @@ def train(net_factory, prefix, end_epoch, base_dir,
         image_size = 24
         radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 0.5;
     else:
-        radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 1.0;
+        radio_cls_loss = 1.0;radio_bbox_loss = 1.0;radio_landmark_loss = 0.5;
         image_size = 48
-    
+
     #define placeholder
     input_image = tf.placeholder(tf.float32, shape=[config.BATCH_SIZE, image_size, image_size, 3], name='input_image')
     label = tf.placeholder(tf.float32, shape=[config.BATCH_SIZE], name='label')
@@ -178,7 +188,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
                 break
             image_batch_array, label_batch_array, bbox_batch_array,landmark_batch_array = sess.run([image_batch, label_batch, bbox_batch,landmark_batch])
             #random flip
-            image_batch_array,landmark_batch_array = random_flip_images(image_batch_array,label_batch_array,landmark_batch_array)
+            image_batch_array,bbox_batch_array,landmark_batch_array = random_flip_images(image_batch_array,label_batch_array,bbox_batch_array,landmark_batch_array)
             '''
             print image_batch_array.shape
             print label_batch_array.shape

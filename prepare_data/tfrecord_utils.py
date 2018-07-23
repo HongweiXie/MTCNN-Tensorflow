@@ -175,8 +175,9 @@ def _process_image(filename, coder):
     assert image.shape[2] == 3
 
     return image_data, height, width
-def _process_image_withoutcoder(filename):
-    image = cv2.imread(filename)
+def _process_image_withoutcoder(filename,image=None):
+    if image is None:
+        image = cv2.imread(filename)
     image_data = image.tostring()
     assert len(image.shape) == 3
     height = image.shape[0]

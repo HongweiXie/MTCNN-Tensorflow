@@ -12,11 +12,14 @@ def show_landmark(face, landmark):
     """
         view face with landmark for visualization
     """
+    colors=[(55,255,155),(0,255,0),(0,0,255),(255,0,0),(0,0,0)]
     face_copied = face.copy().astype(np.uint8)
+    index=0
     for (x, y) in landmark:
         xx = int(face.shape[0]*x)
         yy = int(face.shape[1]*y)
-        cv2.circle(face_copied, (xx, yy), 2, (0,0,0), -1)
+        cv2.circle(face_copied, (xx, yy), 2, colors[index], -1)
+        index+=1
     cv2.imshow("face_rot", face_copied)
     cv2.waitKey(0)
 
@@ -51,8 +54,8 @@ def flip(face, landmark):
     face_flipped_by_x = cv2.flip(face, 1)
     #mirror
     landmark_ = np.asarray([(1-x, y) for (x, y) in landmark])
-    landmark_[[0, 1]] = landmark_[[1, 0]]#left eye<->right eye
-    landmark_[[3, 4]] = landmark_[[4, 3]]#left mouth<->right mouth
+    # landmark_[[0, 1]] = landmark_[[1, 0]]#left eye<->right eye
+    # landmark_[[3, 4]] = landmark_[[4, 3]]#left mouth<->right mouth
     return (face_flipped_by_x, landmark_)
 
 def randomShift(landmarkGt, shift):

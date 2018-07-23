@@ -39,6 +39,7 @@ def getDataFromTxt(txt, with_landmark=True):
             landmark: [(x1, y1), (x2, y2), ...]
     """
     #get dirname
+    print txt
     dirname = os.path.dirname(txt)
     with open(txt, 'r') as fd:
         lines = fd.readlines()
@@ -47,6 +48,8 @@ def getDataFromTxt(txt, with_landmark=True):
     for line in lines:
         line = line.strip()
         components = line.split(' ')
+        if len(components)!=15:
+            continue
         img_path = os.path.join(dirname, components[0]) # file path
         # bounding box, (x1, y1, x2, y2)
         #bbox = (components[1], components[2], components[3], components[4])

@@ -16,8 +16,8 @@ stride = 2
 slide_window = False
 shuffle = False
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_model/Hand_PNet24_landmark/PNet', '../data/MTCNN_hand/Hand_RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet']
-epoch = [18, 4, 16]
+prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_2/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_2/RNet', '../data/MTCNN_model/ONet_landmark/ONet']
+epoch = [18, 18, 16]
 batch_size = [2048, 256, 16]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 # load pnet model

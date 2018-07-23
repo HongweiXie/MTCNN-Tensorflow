@@ -3,6 +3,8 @@ import os
 import random
 import sys
 import time
+import cv2
+import tqdm
 
 import tensorflow as tf
 
@@ -22,19 +24,18 @@ def _add_to_tfrecord(filename, image_example, tfrecord_writer):
     #height:original image's height
     #width:original image's width
     #image_example dict contains image's info
-    image_data, height, width = _process_image_withoutcoder(filename)
+    image_data, height, width = _process_image_withoutcoder(filename,image_example['image'])
     example = _convert_to_example_simple(image_example, image_data)
     tfrecord_writer.write(example.SerializeToString())
 
 
-def _get_output_filename(label,output_dir, name, net):
+def _get_output_filename(output_dir, name, net):
     #st = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     #return '%s/%s_%s_%s.tfrecord' % (output_dir, name, net, st)
-    #return '%s/train_PNet_landmark.tfrecord' % (output_dir)
-    return '%s/%s_landmark.tfrecord' % (output_dir,label)
+    return '%s/train_PNet_landmark.tfrecord' % (output_dir)
     
 
-def run(dataset_dir, net, label,output_dir, name='MTCNN', shuffling=False):
+def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
     """Runs the conversion operation.
 
     Args:
@@ -43,12 +44,12 @@ def run(dataset_dir, net, label,output_dir, name='MTCNN', shuffling=False):
     """
     
     #tfrecord name 
-    tf_filename = _get_output_filename(label,output_dir, name, net)
+    tf_filename = _get_output_filename(output_dir, name, net)
     if tf.gfile.Exists(tf_filename):
         print('Dataset files already exist. Exiting without re-creating them.')
         return
     # GET Dataset, and shuffling.
-    dataset = get_dataset(label,dataset_dir, net=net)
+    dataset = get_dataset(dataset_dir, net=net)
     # filenames = dataset['filename']
     if shuffling:
         tf_filename = tf_filename + '_shuffle'
@@ -63,28 +64,27 @@ def run(dataset_dir, net, label,output_dir, name='MTCNN', shuffling=False):
             sys.stdout.flush()
             filename = image_example['filename']
             _add_to_tfrecord(filename, image_example, tfrecord_writer)
-    tfrecord_writer.close()
     # Finally, write the labels file:
     # labels_to_class_names = dict(zip(range(len(_CLASS_NAMES)), _CLASS_NAMES))
     # dataset_utils.write_label_file(labels_to_class_names, dataset_dir)
     print('\nFinished converting the MTCNN dataset!')
 
 
-def get_dataset(label,dir, net='PNet'):
+def get_dataset(dir, net='PNet'):
     #item = 'imglists/PNet/train_%s_raw.txt' % net
-    #item = 'imglists/PNet/train_%s_landmark.txt' % net
-    #item =  os.path.join(data_dir,'imglists/%s/train_%s_landmark.txt' % (net,net))
-    item=os.path.join(data_dir,'%s/%s_%s.txt'%(net_size,label,net_size))
-    print item 
+    item = os.path.join(data_dir,'imglists/PNet/train_%s_landmark.txt' % net)
+    
     dataset_dir = os.path.join(dir, item)
     imagelist = open(dataset_dir, 'r')
 
     dataset = []
-    for line in imagelist.readlines():
+    lines=imagelist.readlines()
+    for line in tqdm.tqdm(lines):
         info = line.strip().split(' ')
         data_example = dict()
         bbox = dict()
         data_example['filename'] = info[0]
+        data_example['image'] = cv2.imread(info[0])
         data_example['label'] = int(info[1])
         bbox['xmin'] = 0
         bbox['ymin'] = 0
@@ -125,8 +125,6 @@ def get_dataset(label,dir, net='PNet'):
 
 if __name__ == '__main__':
     dir = '.' 
-    net = 'ONet'
-    net_size=48
-    output_directory = os.path.join(data_dir,'imglists/RNet')
-    set_name=['pos','neg','part','landmark']
-    run(dir, net, set_name[2],output_directory, shuffling=False)
+    net = 'PNet'
+    output_directory = os.path.join(data_dir,'imglists/PNet')
+    run(dir, net, output_directory, shuffling=True)
