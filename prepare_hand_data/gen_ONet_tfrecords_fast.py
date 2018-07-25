@@ -133,4 +133,4 @@ if __name__ == '__main__':
     net_size=48
     output_directory = os.path.join(data_dir,'imglists/'+net)
     set_name=['pos','neg','part','landmark']
-    run(dir, net, set_name[3],output_directory, shuffling=True)
+    run(dir, net, set_name[2],output_directory, shuffling=True)

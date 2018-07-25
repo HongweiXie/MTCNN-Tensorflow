@@ -26,15 +26,15 @@ predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-D
 predictor = dlib.shape_predictor(predictor_path)
 
 test_mode = "onet"
-thresh = [0.6, 0.5, 0.7]
+thresh = [0.6, 0.5, 0.6]
 min_face_size = 100
 stride = 2
 slide_window = False
 shuffle = False
 #vis = True
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_2/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_2/RNet', '../data/MTCNN_hand/Hand_ONet_landmark/ONet']
-epoch = [18, 18, 18]
+prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_3/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_3/RNet', '../data/MTCNN_hand/Hand_ONet_landmark/ONet']
+epoch = [18, 20, 18]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 PNet = FcnDetector(P_Net, model_path[0])
 detectors[0] = PNet
@@ -69,6 +69,8 @@ while True:
         t2 = cv2.getTickCount()
         t = (t2 - t1) / cv2.getTickFrequency()
         fps = 1.0 / t
+        if boxes_c.shape[0]<=0:
+            reader.on_detected_finger_tip(image, (-1,-1, cv2.getTickCount()))
         for i in range(boxes_c.shape[0]):
             bbox = boxes_c[i, :4]
             score = boxes_c[i, 4]
@@ -80,14 +82,13 @@ while True:
                 # print(shape.part(i))
 
             reader.on_detected_finger_tip(image,(shape.part(0).x,shape.part(0).y,cv2.getTickCount()))
+
+            # if score > thresh:
+            cv2.rectangle(frame, (corpbbox[0], corpbbox[1]),
+                          (corpbbox[2], corpbbox[3]), (0, 255, 0), 1)
+            cv2.putText(frame, '{:.3f}'.format(score), (corpbbox[0], corpbbox[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                        (0, 0, 255), 2)
             break
-        # if boxes_c.shape[0]<=0:
-            # reader.on_detected_finger_tip(image, (-1,-1, cv2.getTickCount()))
-            # # if score > thresh:
-            # cv2.rectangle(frame, (corpbbox[0], corpbbox[1]),
-            #               (corpbbox[2], corpbbox[3]), (0, 255, 0), 1)
-            # cv2.putText(frame, '{:.3f}'.format(score), (corpbbox[0], corpbbox[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-            #             (0, 0, 255), 2)
         cv2.putText(frame, '{:.4f}'.format(t) + " " + '{:.3f}'.format(fps), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (255, 0, 255), 2)
         colors = [(55, 255, 155), (0, 255, 0), (0, 0, 255), (255, 0, 0), (0, 0, 0)]

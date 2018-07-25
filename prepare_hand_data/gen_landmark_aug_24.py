@@ -72,8 +72,8 @@ def GenerateData(ftxts, output,net,argument=False):
         img = cv2.imread(imgPath)
         assert(img is not None)
         img_h,img_w,img_c = img.shape
-        gt_box = np.array([bbox.left,bbox.top,bbox.right,bbox.bottom])
-        f_face = img[bbox.top:bbox.bottom+1,bbox.left:bbox.right+1]
+        gt_box = np.array([max(0,bbox.left),max(0,bbox.top),min(bbox.right,img_w-1),min(bbox.bottom,img_h-1)])
+        f_face = img[gt_box[1]:gt_box[3]+1,gt_box[0]:gt_box[2]+1]
         f_face = cv2.resize(f_face,(size,size))
         landmark = np.zeros((5, 2))
         #normalize
@@ -98,7 +98,7 @@ def GenerateData(ftxts, output,net,argument=False):
             if max(gt_w, gt_h) < 80 or x1 < 0 or y1 < 0:
                 continue
             #random shift
-            for i in range(5):
+            for i in range(2):
                 bbox_size = npr.randint(int(min(gt_w, gt_h) * 0.8), np.ceil(1.25 * max(gt_w, gt_h)))
                 # delta_x = npr.randint(-gt_w * 0.2, gt_w * 0.2)
                 # delta_y = npr.randint(-gt_h * 0.2, gt_h * 0.2)
@@ -213,7 +213,7 @@ if __name__ == '__main__':
     # train data
     net = "RNet"
     #train_txt = "train.txt"
-    train_txts = ["/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt",'/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output/landmark.txt','/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell/landmark.txt']
+    train_txts = ['/home/sixd-ailabs/Develop/Human/Hand/diandu/test/augment/landmark.txt']#,"/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17/landmark.txt",'/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output/landmark.txt','/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell/landmark.txt']
     imgs,landmarks = GenerateData(train_txts, OUTPUT,net,argument=True)
     
    

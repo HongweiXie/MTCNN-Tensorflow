@@ -95,9 +95,9 @@ def save_hard_example(net, data,save_path):
             resized_im = cv2.resize(cropped_im, (image_size, image_size),
                                     interpolation=cv2.INTER_LINEAR)
 
-            neg_threshold=0.3
+            neg_threshold=0.2
             if(landmark_bboxes is not None):
-                neg_threshold=0.2
+                neg_threshold=0.1
             # save negative images and write label
             # Iou with all gts must below 0.3            
             if len(Iou)<=0 or (np.max(Iou) < neg_threshold and neg_num < 60):
@@ -120,10 +120,10 @@ def save_hard_example(net, data,save_path):
                     inner_bbox=findInnerBBox(x_left,y_top,x_right,y_bottom,landmark_bboxes)
 
                     if inner_bbox is None:
-                        pos_threshold = 0.65
+                        pos_threshold = 0.6
                         part_threshold = 0.5
                     else:
-                        pos_threshold=0.6
+                        pos_threshold=0.5
                         part_threshold=0.4
 
                 # compute bbox reg label
@@ -224,7 +224,7 @@ def parse_args():
     parser.add_argument('--test_mode', dest='test_mode', help='test net type, can be pnet, rnet or onet',
                         default='PNet', type=str)
     parser.add_argument('--prefix', dest='prefix', help='prefix of model name', nargs="+",
-                        default=['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_2/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet/ONet'],
+                        default=['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_3/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet/ONet'],
                         type=str)
     parser.add_argument('--epoch', dest='epoch', help='epoch number of model to load', nargs="+",
                         default=[18, 14, 22], type=int)
@@ -254,7 +254,7 @@ if __name__ == '__main__':
         image_size = 48
 
     data_dir = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/%s' % str(image_size)
-    input_dirs= ['/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell','/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17','/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output']
+    input_dirs= ['/home/sixd-ailabs/Develop/Human/Hand/diandu/test/augment','/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell','/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17','/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output']
     
     neg_dir = os.path.join(data_dir, 'negative')
     pos_dir = os.path.join(data_dir, 'positive')

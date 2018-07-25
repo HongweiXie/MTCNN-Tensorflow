@@ -17,7 +17,7 @@ from prepare_data.utils import *
 from data_util import *
 #net : 24(RNet)/48(ONet)
 #data: dict()
-need_detection=False
+need_detection=True
 def save_hard_example(net, data, save_path):
     # load ground truth from annotation file
     # format of each line: image/path [x1,y1,x2,y2] for each gt_box in this image
@@ -92,7 +92,7 @@ def save_hard_example(net, data, save_path):
             resized_im = cv2.resize(cropped_im, (image_size, image_size),
                                     interpolation=cv2.INTER_LINEAR)
 
-            neg_threshold = 0.3
+            neg_threshold = 0.1
             # save negative images and write label
             # Iou with all gts must below 0.3
             if len(Iou) <= 0 or (np.max(Iou) < neg_threshold and neg_num < 60):
@@ -114,10 +114,10 @@ def save_hard_example(net, data, save_path):
                     inner_bbox = findInnerBBox(x_left, y_top, x_right, y_bottom, landmark_bboxes)
 
                     if inner_bbox is None:
-                        pos_threshold = 0.65
+                        pos_threshold = 0.6
                         part_threshold = 0.4
                     else:
-                        pos_threshold = 0.6
+                        pos_threshold = 0.5
                         part_threshold = 0.4
 
                 # compute bbox reg label
@@ -216,14 +216,14 @@ def parse_args():
     parser.add_argument('--test_mode', dest='test_mode', help='test net type, can be pnet, rnet or onet',
                         default='RNet', type=str)
     parser.add_argument('--prefix', dest='prefix', help='prefix of model name', nargs="+",
-                        default=['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_2/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_2/RNet', '../data/MTCNN_model/ONet/ONet'],
+                        default=['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_3/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_3/RNet', '../data/MTCNN_model/ONet/ONet'],
                         type=str)
     parser.add_argument('--epoch', dest='epoch', help='epoch number of model to load', nargs="+",
-                        default=[18, 18, 22], type=int)
+                        default=[18, 20, 22], type=int)
     parser.add_argument('--batch_size', dest='batch_size', help='list of batch size used in prediction', nargs="+",
                         default=[2048, 256, 16], type=int)
     parser.add_argument('--thresh', dest='thresh', help='list of thresh for pnet, rnet, onet', nargs="+",
-                        default=[0.1, 0.05, 0.7], type=float)
+                        default=[0.4, 0.05, 0.7], type=float)
     parser.add_argument('--min_face', dest='min_face', help='minimum face size for detection',
                         default=60, type=int)
     parser.add_argument('--stride', dest='stride', help='stride of sliding window',

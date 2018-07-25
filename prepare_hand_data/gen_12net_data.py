@@ -8,7 +8,7 @@ from prepare_data.utils import IoU
 import glob
 from pascal_voc_io import PascalVocReader
 #input_dirs=["/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17"]
-input_dirs = ['/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell',"/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17","/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output"]
+input_dirs = ["/home/sixd-ailabs/Develop/Human/Hand/diandu/test/augment",'/home/sixd-ailabs/Develop/Human/Hand/diandu/zhijian/youeryuan_dell',"/home/sixd-ailabs/Develop/Human/Hand/diandu/chengren_17","/home/sixd-ailabs/Develop/Human/Hand/diandu/test/output"]
 save_dir = "/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/12"
 pos_save_dir = os.path.join(save_dir,'positive')
 part_save_dir = os.path.join(save_dir,'part')
@@ -31,6 +31,8 @@ f3 = open(os.path.join(save_dir, 'part_12.txt'), 'w')
 
 min_hand=100
 # max_hand=360
+
+neg_iou_threshold=0.1
 
 p_idx = 0 # positive
 n_idx = 0 # negative
@@ -94,7 +96,7 @@ for input_dir in input_dirs:
             xmax = points[2][0]
             ymax = points[2][1]
             label = shape[0]
-            if label.find('index')>=0 or label=='point_l' or label=='point_r':
+            if label.find('index')>=0 or label=='point_l' or label=='point_r' or label=='point':
                 bbox.append(xmin)
                 bbox.append(ymin)
                 bbox.append(xmax)
@@ -137,7 +139,7 @@ for input_dir in input_dirs:
             cropped_im = img[ny: ny + size, nx: nx + size, :]
             resized_im = cv2.resize(cropped_im, (net_size, net_size), interpolation=cv2.INTER_LINEAR)
 
-            if len(Iou) <= 0 or np.max(Iou) < 0.3:
+            if len(Iou) <= 0 or np.max(Iou) < neg_iou_threshold:
                 # Iou with all gts must below 0.3
                 save_file = os.path.join(neg_save_dir, "%s.jpg" % n_idx)
                 f2.write("12/negative/%s.jpg" % n_idx + ' 0\n')
@@ -186,7 +188,7 @@ for input_dir in input_dirs:
                 # resize
                 resized_im = cv2.resize(cropped_im, (net_size, net_size), interpolation=cv2.INTER_LINEAR)
                 Iou = IoU(crop_box, boxes)
-                if len(Iou) <= 0 or np.max(Iou) < 0.3:
+                if len(Iou) <= 0 or np.max(Iou) < neg_iou_threshold:
                     save_file = os.path.join(neg_save_dir, "%s.jpg" % n_idx)
                     f2.write("12/negative/%s.jpg" % n_idx + ' 0\n')
                     cv2.imwrite(save_file, resized_im)
@@ -228,15 +230,15 @@ for input_dir in input_dirs:
                 cropped_im = img[ny1: ny1 + size, nx1: nx1 + size, :]
                 resized_im = cv2.resize(cropped_im, (net_size, net_size), interpolation=cv2.INTER_LINEAR)
 
-                if np.max(Iou) < 0.3:
+                if np.max(Iou) < neg_iou_threshold:
                     # Iou with all gts must below 0.3
                     save_file = os.path.join(neg_save_dir, "%s.jpg" % n_idx)
                     f2.write("12/negative/%s.jpg" % n_idx + ' 0\n')
                     cv2.imwrite(save_file, resized_im)
                     n_idx += 1
                     # generate positive examples and part faces
-            for i in range(30):
-                pos_threshold=0.6
+            for i in range(10):
+                pos_threshold=0.5
                 part_threshold=0.4
                 if landmark_bbox is None:
                     # pos and part face size [minsize*0.8,maxsize*1.25]

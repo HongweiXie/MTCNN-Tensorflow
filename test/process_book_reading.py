@@ -63,12 +63,12 @@ class BookReader():
                 min_dis = min(min_dis, dis)
                 mean_dis+=dis
             mean_dis/=valid_num
-            if (max_dis < mean_dis * 10 and max_dis<50):
+            if (max_dis < mean_dis * 3 and max_dis<50):
                 image_char = img.astype(np.uint8).tostring()
                 print('read:', ax, ay)
                 ret=self.nativeBookReader.readPointOnFrame(image_char,img.shape[0], img.shape[1],ax,ay)
                 readTime=cv2.getTickCount()
-                if(ret[3]!=self.preAudioPath or (readTime-self.preReadTimeStamp)/cv2.getTickFrequency()>30):
+                if(ret[3]!=self.preAudioPath or (readTime-self.preReadTimeStamp)/cv2.getTickFrequency()>10):
                     self.nativeBookReader.playSound(ret[3])
                     self.preReadTimeStamp=readTime
                 self.preAudioPath=ret[3]

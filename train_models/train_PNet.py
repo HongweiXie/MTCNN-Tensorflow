@@ -22,7 +22,7 @@ if __name__ == '__main__':
     model_name = 'MTCNN'
     #model_path = '../data/%s_model/PNet/PNet' % model_name
     #with landmark
-    model_path = '../data/%s_hand/Hand_PNet24_landmark_16_64_2/PNet' % model_name
+    model_path = '../data/%s_hand/Hand_PNet24_landmark_16_64_3/PNet' % model_name
             
     prefix = model_path
     end_epoch = 30

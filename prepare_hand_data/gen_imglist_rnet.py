@@ -40,19 +40,19 @@ with open(os.path.join(dir_path, "train_%s_landmark.txt" % (net)), "w") as f:
     # print (len(pos)+len(pos2)+len(pos3))
     print len(part)
     print len(landmark)
-    # base_num=len(pos)
-    # if len(neg) > base_num * 5:
-    #     neg_keep = npr.choice(len(neg), size=base_num * 5, replace=True)
-    # else:
-    #     neg_keep = npr.choice(len(neg), size=len(neg), replace=True)
-
+    base_num=len(pos)
+    if len(neg) > base_num * 5:
+        neg_keep = npr.choice(len(neg), size=base_num * 5, replace=True)
+    else:
+        neg_keep = npr.choice(len(neg), size=len(neg), replace=True)
+    neg_keep=sorted(neg_keep)
     for i in np.arange(len(pos)):
         f.write(pos[i])
     # for i in np.arange(len(pos2)):
     #     f.write(data_dir+'/'+pos2[i])
     # for i in np.arange(len(pos3)):
     #     f.write(data_dir+'/'+pos3[i])
-    for i in np.arange(len(neg)):
+    for i in neg_keep:
         f.write(neg[i])
     for i in np.arange(len(part)):
         f.write(part[i])

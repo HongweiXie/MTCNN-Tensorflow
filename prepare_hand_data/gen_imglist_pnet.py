@@ -51,17 +51,17 @@ with open(os.path.join(dir_path, "%s" %(net),"train_%s_landmark.txt" % (net)), "
     nums = [len(neg), len(pos), len(part)]
     ratio = [3, 1, 1]
     #base_num = min(nums)
-    base_num = len(pos)
+    base_num = 100000
     print(len(neg), len(pos), len(part), base_num)
     if len(neg) > base_num * 3:
         neg_keep = npr.choice(len(neg), size=base_num * 3, replace=True)
         neg_keep=sorted(neg_keep)
     else:
         neg_keep = npr.choice(len(neg), size=len(neg), replace=True)
-    # pos_keep = npr.choice(len(pos), size=base_num, replace=True)
+    pos_keep = npr.choice(len(pos), size=base_num, replace=True)
     part_keep = npr.choice(len(part), size=base_num, replace=True)
     part_keep=sorted(part_keep)
-    pos_keep =range(0,len(pos))
+    pos_keep =sorted(pos_keep)
     # neg_keep =range(0,base_num*3)
     # part_keep=range(0,len(part))
 

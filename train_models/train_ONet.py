@@ -21,7 +21,7 @@ if __name__ == '__main__':
     base_dir = '/home/sixd-ailabs/Develop/Human/Hand/diandu/Train/imglists/ONet'
 
     model_name = 'MTCNN'
-    model_path = '../data/%s_hand/Hand_ONet_landmark/ONet' % model_name
+    model_path = '../data/%s_hand/Hand_ONet_landmark_3/ONet' % model_name
     prefix = model_path
     end_epoch = 22
     display = 10
