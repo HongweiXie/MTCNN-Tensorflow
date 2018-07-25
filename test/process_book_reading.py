@@ -44,8 +44,9 @@ class BookReader():
         while len(self.fingerTipList) > 0 and (timestamp - self.fingerTipList[0][2])/cv2.getTickFrequency() > time_interval:
             self.fingerTipList.pop(0)
         num = len(self.fingerTipList)
-        if num < 5:
-            return
+        # print('tiplist:',num)
+        # if num < 5:
+        #     return
         valid_num = 0
         for tip in self.fingerTipList:
             if tip[0] >= 0 and tip[1] >= 0:
@@ -63,12 +64,23 @@ class BookReader():
                 min_dis = min(min_dis, dis)
                 mean_dis+=dis
             mean_dis/=valid_num
-            if (max_dis < mean_dis * 3 and max_dis<50):
+            # print(max_dis,mean_dis)
+            if (max_dis < mean_dis * 2 and max_dis<20):
                 image_char = img.astype(np.uint8).tostring()
                 print('read:', ax, ay)
                 ret=self.nativeBookReader.readPointOnFrame(image_char,img.shape[0], img.shape[1],ax,ay)
+                if(ret[0]!=1):
+                    print('Error:',ret[0])
+                    return
+
                 readTime=cv2.getTickCount()
-                if(ret[3]!=self.preAudioPath or (readTime-self.preReadTimeStamp)/cv2.getTickFrequency()>10):
-                    self.nativeBookReader.playSound(ret[3])
-                    self.preReadTimeStamp=readTime
-                self.preAudioPath=ret[3]
+                interval=(readTime-self.preReadTimeStamp)/cv2.getTickFrequency()
+                read_wav = str(ret[4])
+                # print('interval',interval,(read_wav==self.preAudioPath))
+
+                if(read_wav!=self.preAudioPath or (read_wav==self.preAudioPath and interval>10)):
+                    self.preReadTimeStamp = readTime
+                    self.preAudioPath = read_wav
+                    self.nativeBookReader.playSound(read_wav)
+                    # print ('read it!')
+

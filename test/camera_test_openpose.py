@@ -64,7 +64,7 @@ shuffle = False
 #vis = True
 detectors = [None, None, None]
 prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_3/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_3/RNet', '../data/MTCNN_hand/Hand_ONet_landmark_3/ONet']
-epoch = [18, 20, 18]
+epoch = [20, 20, 22]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 PNet = FcnDetector(P_Net, model_path[0])
 detectors[0] = PNet
@@ -102,7 +102,11 @@ while True:
             corpbbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
 
             hands_rectangles=[[expand_bbox(bbox),[0,0,0,0]]]
-            left_hands, right_hands, frame = openpose.forward_hands(frame, hands_rectangles, True)
+            left_hands, right_hands, _ = openpose.forward_hands(frame, hands_rectangles, True)
+            index_finger = left_hands[0][8]
+            print(index_finger[2])
+            cv2.circle(frame, (int(index_finger[0]), int(index_finger[1])), 5, (0, 0, 255), -1)
+
 
             # if score > thresh:
             cv2.rectangle(frame, (corpbbox[0], corpbbox[1]),
