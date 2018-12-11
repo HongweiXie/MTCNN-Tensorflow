@@ -56,7 +56,7 @@ predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-D
 predictor = dlib.shape_predictor(predictor_path)
 
 test_mode = "onet"
-thresh = [0.8, 0.5, 0.6]
+thresh = [0.8, 0.6, 0.7]
 min_face_size = 150
 stride = 2
 slide_window = False
@@ -102,9 +102,9 @@ while True:
             corpbbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
 
             hands_rectangles=[[expand_bbox(bbox),[0,0,0,0]]]
-            left_hands, right_hands, _ = openpose.forward_hands(frame, hands_rectangles, True)
+            left_hands, right_hands, frame = openpose.forward_hands(frame, hands_rectangles, True)
             index_finger = left_hands[0][8]
-            print(index_finger[2])
+            # print(index_finger[2])
             cv2.circle(frame, (int(index_finger[0]), int(index_finger[1])), 5, (0, 0, 255), -1)
 
 

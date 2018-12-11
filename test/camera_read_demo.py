@@ -22,19 +22,19 @@ def convert2dlibbbox(bbox):
     return dlib.rectangle(int(left),int(top),int(right),int(bottom))
 
 
-predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-Detector-Desktop_Qt_5_10_0_GCC_64bit-Default/Hand_5_Landmarks_Detector.dat'
+predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-Detector-Desktop_Qt_5_10_0_GCC_64bit-Default/Hand_5_Landmarks_Detector_r_aug.dat'
 predictor = dlib.shape_predictor(predictor_path)
 
 test_mode = "onet"
 thresh = [0.6, 0.5, 0.6]
-min_face_size = 100
+min_face_size = 200
 stride = 2
 slide_window = False
 shuffle = False
 #vis = True
 detectors = [None, None, None]
-prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_3/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_3/RNet', '../data/MTCNN_hand/Hand_ONet_landmark/ONet']
-epoch = [18, 20, 18]
+prefix = ['../data/MTCNN_hand/Hand_PNet24_landmark_16_64_3/PNet', '../data/MTCNN_hand/Hand_RNet_landmark_3/RNet', '../data/MTCNN_hand/Hand_ONet_landmark_3/ONet']
+epoch = [20, 20, 20]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 PNet = FcnDetector(P_Net, model_path[0])
 detectors[0] = PNet

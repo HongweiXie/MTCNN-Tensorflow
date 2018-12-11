@@ -21,7 +21,7 @@ def convert2dlibbbox(bbox):
     return dlib.rectangle(int(left),int(top),int(right),int(bottom))
 
 
-predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-Detector-Desktop_Qt_5_10_0_GCC_64bit-Default/Hand_5_Landmarks_Detector_100.dat'
+predictor_path='/home/sixd-ailabs/Develop/Human/Hand/Code/build-Hand-Landmarks-Detector-Desktop_Qt_5_10_0_GCC_64bit-Default/Hand_5_Landmarks_Detector_r_aug.dat'
 predictor = dlib.shape_predictor(predictor_path)
 
 test_mode = "onet"
@@ -47,10 +47,10 @@ mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-video = cv2.VideoWriter('result_landmark/output_onet.avi', fourcc, 20.0, (640, 480))
+video = cv2.VideoWriter('result_landmark/output_onet.avi', fourcc, 20.0, (1280, 720))
 video_capture = cv2.VideoCapture(1)
-video_capture.set(3, 640)
-video_capture.set(4, 480)
+video_capture.set(3, 1280)
+video_capture.set(4, 720)
 corpbbox = None
 while True:
     # fps = video_capture.get(cv2.CAP_PROP_FPS)

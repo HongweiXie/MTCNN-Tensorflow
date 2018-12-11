@@ -106,9 +106,9 @@ while True:
             score = boxes_c[i, 4]
             corpbbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
 
-            hands_rectangles=[[expand_bbox(bbox),[0,0,0,0]]]
+            hands_rectangles=[[[0,0,0,0],expand_bbox(bbox)]]
             left_hands, right_hands, _= openpose.forward_hands(frame, hands_rectangles, True)
-            index_finger = left_hands[0][8]
+            index_finger = right_hands[0][8]
             # print(index_finger[2])
             reader.on_detected_finger_tip(image, (index_finger[0], index_finger[1], cv2.getTickCount()))
 
